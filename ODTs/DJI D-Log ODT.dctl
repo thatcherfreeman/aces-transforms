@@ -1,0 +1,48 @@
+DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+
+/**
+ * ACES AP0 to D-LOG conversion.
+ * Goes from scene linear, ACES AP0 gamut
+ * to D-Log and D-gamut.
+ *
+ * This can be used as an ODT in Resolve.
+ */
+
+__DEVICE__ inline float linear_to_dlog(float x)
+{
+    const float a = 0.9892f;
+    const float b = 0.0108f;
+    const float c = 0.256663f;
+    const float d = 0.584555f;
+    const float e = 6.025f;
+    const float f = 0.0929f;
+    const float cut1 = 0.0078f; // Should be equal to ((cut2 - f) / e)
+    const float cut2 = 0.14f; // should be equal to (e * cut1 + f)
+
+    if (x > cut1) {
+        return (c * _log10f(a * x + b) + d);
+    } else {
+        return (e * x + f);
+    }
+}
+
+// Used inverse of matrix from the IDT.
+__CONSTANT__ float matrix[9] = {
+     1.473480f, -0.321718f, -0.151762f,
+    -0.095928f,  1.016516f,  0.079413f,
+     0.016883f,  0.062963f,  0.920154f,
+};
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B)
+{
+    float r = ( matrix[0] * p_R) + ( matrix[1] * p_G) + ( matrix[2] * p_B);
+    float g = ( matrix[3] * p_R) + ( matrix[4] * p_G) + ( matrix[5] * p_B);
+    float b = ( matrix[6] * p_R) + ( matrix[7] * p_G) + ( matrix[8] * p_B);
+
+    float r2 = linear_to_dlog(r);
+    float g2 = linear_to_dlog(g);
+    float b2 = linear_to_dlog(b);
+
+    float3 res = to_float3(r2, g2, b2);
+    return res;
+}

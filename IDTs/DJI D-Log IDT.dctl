@@ -1,0 +1,50 @@
+DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+
+/**
+ * D-log to ACES AP0 conversion.
+ * Goes from D-Log and D-Gamut
+ * to scene linear, ACES AP0 gamut.
+ *
+ * This can be used as an IDT in Resolve.
+ */
+
+__DEVICE__ inline float flog_to_linear(float t)
+{
+    const float a = 0.9892f;
+    const float b = 0.0108f;
+    const float c = 0.256663f;
+    const float d = 0.584555f;
+    const float e = 6.025f;
+    const float f = 0.0929f;
+    const float cut1 = 0.0078f; // Should be equal to ((cut2 - f) / e)
+    const float cut2 = 0.14f; // should be equal to (e * cut1 + f)
+
+    if (t > cut2) {
+        return ((_exp10f((t - d) / c) - b) / a);
+    } else {
+        return ((t - f) / e);
+    }
+}
+
+// Used values calculated from http://color.support/colorspacecalculator.html
+// source color space D-Gamut and Output ACES AP0, with Bradford chromatic adaptation.
+// D-Gamut primaries in pdf in this repo.
+__CONSTANT__ float matrix[9] = {
+     0.691430f,  0.212906f,  0.095663f,
+     0.066597f,  1.009547f, -0.076144f,
+    -0.017244f, -0.072986f,  1.090230f,
+};
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B)
+{
+    float r = flog_to_linear(p_R);
+    float g = flog_to_linear(p_G);
+    float b = flog_to_linear(p_B);
+
+    float r2 = ( matrix[0] * r) + ( matrix[1] * g) + ( matrix[2] * b);
+    float g2 = ( matrix[3] * r) + ( matrix[4] * g) + ( matrix[5] * b);
+    float b2 = ( matrix[6] * r) + ( matrix[7] * g) + ( matrix[8] * b);
+
+    float3 res = to_float3(r2, g2, b2);
+    return res;
+}
