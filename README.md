@@ -6,6 +6,7 @@ The following log curves/image profiles are supported:
 
 - Fuji F-Log
 - DJI D-Log
+- Nikon N-Log
 - ZCAM Z-Log2
 
 ## Installing ACES Transform DCTLs in DaVinci Resolve

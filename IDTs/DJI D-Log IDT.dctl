@@ -8,7 +8,7 @@ DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
  * This can be used as an IDT in Resolve.
  */
 
-__DEVICE__ inline float flog_to_linear(float t)
+__DEVICE__ inline float dlog_to_linear(float t)
 {
     const float a = 0.9892f;
     const float b = 0.0108f;
@@ -37,9 +37,9 @@ __CONSTANT__ float matrix[9] = {
 
 __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B)
 {
-    float r = flog_to_linear(p_R);
-    float g = flog_to_linear(p_G);
-    float b = flog_to_linear(p_B);
+    float r = dlog_to_linear(p_R);
+    float g = dlog_to_linear(p_G);
+    float b = dlog_to_linear(p_B);
 
     float r2 = ( matrix[0] * r) + ( matrix[1] * g) + ( matrix[2] * b);
     float g2 = ( matrix[3] * r) + ( matrix[4] * g) + ( matrix[5] * b);
