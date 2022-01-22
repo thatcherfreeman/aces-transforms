@@ -5,6 +5,7 @@ In this repository, I have made several IDTs and ODTs that can be used with DaVi
 IDTs and ODTs are provided for the following log curves/image profiles:
 
 - Fuji F-Log
+- DaVinci Intermediate
 - DJI D-Log
 - Nikon N-Log
 - ZCAM Z-Log2

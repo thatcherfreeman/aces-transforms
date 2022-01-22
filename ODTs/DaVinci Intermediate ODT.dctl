@@ -1,0 +1,46 @@
+DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+
+/**
+ * ACES AP0 to DaVinci Intermediate conversion.
+ * Goes from scene linear, ACES AP0 gamut
+ * to DaVinci Intermediate and DaVinci Wide Gamut.
+ *
+ * This can be used as an ODT in Resolve.
+ */
+
+__DEVICE__ inline float linear_to_log(float x)
+{
+    const float a = 0.0075f;
+    const float b = 7.0f;
+    const float c = 0.07329248f;
+    const float m = 10.44426855f;
+    const float lin_cut = 0.00262409f; // Should be equal to ((cut2 - f) / e)
+    const float log_cut = 0.02740668f; // should be equal to (e * cut1 + f)
+
+    if (x > lin_cut) {
+        return (_log2f(x + a) + b) * c;
+    } else {
+        return x * m;
+    }
+}
+
+// Used inverse of matrix from the IDT.
+__CONSTANT__ float matrix[9] = {
+     1.327928f, -0.211550f, -0.116378f,
+    -0.013826f,  0.914361f,  0.099464f,
+     0.098561f,  0.076505f,  0.824934f,
+};
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B)
+{
+    float r = ( matrix[0] * p_R) + ( matrix[1] * p_G) + ( matrix[2] * p_B);
+    float g = ( matrix[3] * p_R) + ( matrix[4] * p_G) + ( matrix[5] * p_B);
+    float b = ( matrix[6] * p_R) + ( matrix[7] * p_G) + ( matrix[8] * p_B);
+
+    float r2 = linear_to_log(r);
+    float g2 = linear_to_log(g);
+    float b2 = linear_to_log(b);
+
+    float3 res = to_float3(r2, g2, b2);
+    return res;
+}

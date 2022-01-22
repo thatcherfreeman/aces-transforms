@@ -1,0 +1,47 @@
+DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+
+/**
+ * DaVinci Intermediate to ACES AP0 conversion.
+ * Goes from DaVinci Intermediate and DaVinci Wide Gamut
+ * to scene linear, ACES AP0 gamut.
+ *
+ * This can be used as an IDT in Resolve.
+ */
+
+__DEVICE__ inline float log_to_linear(float t)
+{
+    const float a = 0.0075f;
+    const float b = 7.0f;
+    const float c = 0.07329248f;
+    const float m = 10.44426855f;
+    const float lin_cut = 0.00262409f; // Should be equal to ((cut2 - f) / e)
+    const float log_cut = 0.02740668f; // should be equal to (e * cut1 + f)
+
+    if (t > log_cut) {
+        return _exp2f((t / c) - b) - a;
+    } else {
+        return t / m;
+    }
+}
+
+// Used values calculated from http://color.support/colorspacecalculator.html
+// source color space DaVinci Wide Gamut and Output ACES AP0, with Bradford chromatic adaptation.
+__CONSTANT__ float matrix[9] = {
+     0.748430f,  0.166000f,  0.085570f,
+     0.021258f,  1.109520f, -0.130779f,
+    -0.091392f, -0.122732f,  1.214123f,
+};
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B)
+{
+    float r = log_to_linear(p_R);
+    float g = log_to_linear(p_G);
+    float b = log_to_linear(p_B);
+
+    float r2 = ( matrix[0] * r) + ( matrix[1] * g) + ( matrix[2] * b);
+    float g2 = ( matrix[3] * r) + ( matrix[4] * g) + ( matrix[5] * b);
+    float b2 = ( matrix[6] * r) + ( matrix[7] * g) + ( matrix[8] * b);
+
+    float3 res = to_float3(r2, g2, b2);
+    return res;
+}
