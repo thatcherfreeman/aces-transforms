@@ -40,6 +40,9 @@ __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p
     float g2 = g * gain * 3.7f;
     float b2 = b * gain * 3.7f;
 
+    // Rows add up to less than 1 for some reason, which results in the
+    // gain being increased to make up for it. This matrix was provided by
+    // the official Z-CAM IDT.
     r = ( 0.59268922f * r2) + ( 0.23980554f * g2) + ( 0.09364286f * b2);
     g = ( 0.00782530f * r2) + ( 0.99994013f * g2) + (-0.07973914f * b2);
     b = ( 0.06103745f * r2) + (-0.24592234f * g2) + ( 1.13939635f * b2);
