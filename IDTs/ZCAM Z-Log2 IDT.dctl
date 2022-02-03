@@ -31,10 +31,10 @@ __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p
     float b = zlog_to_linear(p_B);
 
     // Default is 8.0
-    // I've set this value to 2.5 because that's what
+    // I've set this value to 3.6 because that's what
     // maps 40% in zlog2 to 0.18 (middle gray). Exposing middle gray to
     // 40% is the official Z-Cam recommendation.
-    const float gain = 2.5f;
+    const float gain = 3.6f;
 
     float r2 = r * gain * 3.7f;
     float g2 = g * gain * 3.7f;

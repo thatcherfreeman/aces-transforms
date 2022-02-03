@@ -33,7 +33,7 @@ __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p
     float b2 = (-0.09620104f * p_R) + ( 0.24508222f * p_G) + ( 0.90271589f * p_B);
 
     // Default is 8.0f
-    const float gain = 2.5f;
+    const float gain = 3.6f;
 
     float r = r2 / (gain * 3.7f);
     float g = g2 / (gain * 3.7f);
