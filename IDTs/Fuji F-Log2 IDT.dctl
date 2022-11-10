@@ -1,0 +1,49 @@
+DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+
+/**
+ * F-log2 to ACES AP0 conversion.
+ * Goes from F-Log2 and F-Log2 gamut (equivalent to BT 2020 gamut)
+ * to scene linear, ACES AP0 gamut.
+ *
+ * This can be used as an IDT in Resolve.
+ */
+
+__DEVICE__ inline float flog2_to_linear(float t)
+{
+    const float a = 0.555556f;
+    const float b = 0.064829f;
+    const float c = 0.245281f;
+    const float d = 0.384316f;
+    const float e = 8.799461f;
+    const float f = 0.092864f;
+    const float cut1 = 0.000889f; // Should be equal to ((cut2 - f) / e)
+    const float cut2 = 0.100686685370811f; // should be equal to (e * cut1 + f)
+
+    if (t >= cut2) {
+        return ((_exp10f((t - d) / c) - b) / a);
+    } else {
+        return ((t - f) / e);
+    }
+}
+
+// Used values calculated from http://color.support/colorspacecalculator.html
+// source color space BT 2020 and Output ACES AP0, with Bradford chromatic adaptation.
+__CONSTANT__ float matrix[9] = {
+     0.679086f, 0.157701f, 0.163213f,
+     0.046002f, 0.859055f, 0.094943f,
+    -0.000574f, 0.028468f, 0.972106f,
+};
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B)
+{
+    float r = flog2_to_linear(p_R);
+    float g = flog2_to_linear(p_G);
+    float b = flog2_to_linear(p_B);
+
+    float r2 = ( matrix[0] * r) + ( matrix[1] * g) + ( matrix[2] * b);
+    float g2 = ( matrix[3] * r) + ( matrix[4] * g) + ( matrix[5] * b);
+    float b2 = ( matrix[6] * r) + ( matrix[7] * g) + ( matrix[8] * b);
+
+    float3 res = to_float3(r2, g2, b2);
+    return res;
+}
