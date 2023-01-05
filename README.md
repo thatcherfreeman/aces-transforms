@@ -4,10 +4,12 @@ In this repository, I have made several IDTs and ODTs that can be used with DaVi
 ## Current supported Log curves
 IDTs and ODTs are provided for the following log curves/image profiles:
 
+- DJI D-Log
 - DaVinci Intermediate
 - Fuji F-Log
 - Fuji F-Log2
-- DJI D-Log
+- GoPro ProTune Native, Color Profile
+- GoPro ProTune Native, Flat Profile
 - Nikon N-Log
 - ZCAM Z-Log2
 
