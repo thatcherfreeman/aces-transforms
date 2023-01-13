@@ -10,7 +10,7 @@ DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
 
 __DEVICE__ inline float linear_to_flog2(float x)
 {
-    const float a = 0.555556f;
+    const float a = 5.555556f;
     const float b = 0.064829f;
     const float c = 0.245281f;
     const float d = 0.384316f;
