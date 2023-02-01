@@ -1,5 +1,9 @@
 DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
 
+__DEVICE__ inline float powf(float base, float exp) {
+    return _copysignf(_powf(_fabs(base), exp), base);
+}
+
 /**
  * ACES AP0 to N-LOG conversion.
  * Goes from scene linear, ACES AP0 gamut
@@ -20,7 +24,7 @@ __DEVICE__ inline float linear_to_nlog(float x)
     if (x >= cut1) {
         return c * _logf(x) + d;
     } else {
-        return e * _powf(x + f, 1.0f / 3.0f);
+        return e * powf(x + f, 1.0f / 3.0f);
     }
 }
 

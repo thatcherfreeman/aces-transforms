@@ -1,5 +1,9 @@
 DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
 
+__DEVICE__ inline float powf(float base, float exp) {
+    return _copysignf(_powf(_fabs(base), exp), base);
+}
+
 /**
  * N-log to ACES AP0 conversion.
  * Goes from N-Log and N-Log gamut (equivalent to BT 2020)
@@ -20,7 +24,7 @@ __DEVICE__ inline float nlog_to_linear(float t)
     if (t >= cut2) {
         return _expf((t - d) / c);
     } else {
-        return _powf(t / e, 3.0f) - f;
+        return powf(t / e, 3.0f) - f;
     }
 }
 
