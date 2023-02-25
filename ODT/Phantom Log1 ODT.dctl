@@ -1,0 +1,43 @@
+// Written by Thatcher Freeman
+// Based on a clip shot on a Phantom Flex4k and decoded two ways in PCC
+DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+
+__DEVICE__ float linear_to_phantom_log1(float x) {
+    const float base = 233.7124786376953;
+    const float offset = -0.00003856978582916781;
+    const float scale = 0.004211863968521357;
+    const float slope = 0.06323110312223434;
+    const float intercept = -0.00018377490050625056;
+    const float cut = 0.1857178807258606;
+
+    if (x < cut) {
+        return slope * x + intercept;
+    } else {
+        return _powf(base, x) * scale + offset;
+    }
+}
+
+__DEVICE__ float3 mv_33_3(float mat[3][3], float3 v) {
+    float3 out = make_float3(mat[0][0] * v.x + mat[0][1] * v.y + mat[0][2] * v.z,
+                             mat[1][0] * v.x + mat[1][1] * v.y + mat[1][2] * v.z,
+                             mat[2][0] * v.x + mat[2][1] * v.y + mat[2][2] * v.z);
+    return out;
+}
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
+    float3 rgb = make_float3(p_R, p_G, p_B);
+
+    // Used inverse of the matrix in the IDT.
+    float matrix[3][3] = {
+       { 2.52168493, -1.13413185, -0.38755421},
+       {-0.27647861,  1.37271938, -0.0962394 },
+       {-0.01537758, -0.15297633,  1.16835375},
+    };
+    float3 rgb2 = mv_33_3(matrix, rgb);
+
+    const float gain = 3.0;
+    rgb2 = rgb2 / gain;
+
+    float3 out = make_float3(linear_to_phantom_log1(rgb2.x), linear_to_phantom_log1(rgb2.y), linear_to_phantom_log1(rgb2.z));
+    return out;
+}

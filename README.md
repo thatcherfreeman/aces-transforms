@@ -12,6 +12,8 @@ IDTs and ODTs are provided for the following log curves/image profiles:
 - GoPro ProTune Native, Flat Profile
 - Leica L-Log
 - Nikon N-Log
+- Phantom Log1
+- Phantom Log2
 - ZCAM Z-Log2
 
 ## Installing ACES Transform DCTLs in DaVinci Resolve

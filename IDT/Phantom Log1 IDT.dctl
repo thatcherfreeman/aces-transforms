@@ -1,0 +1,42 @@
+// Written by Thatcher Freeman
+// Based on a clip shot on a Phantom Flex4k and decoded two ways in PCC
+DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+
+__DEVICE__ float phantom_log1_to_linear(float x) {
+    const float base = 233.7124786376953;
+    const float offset = -0.00003856978582916781;
+    const float scale = 0.004211863968521357;
+    const float slope = 0.06323110312223434;
+    const float intercept = -0.00018377490050625056;
+    const float cut = 0.1857178807258606;
+
+    if (x < cut) {
+        return slope * x + intercept;
+    } else {
+        return _powf(base, x) * scale + offset;
+    }
+}
+
+__DEVICE__ float3 mv_33_3(float mat[3][3], float3 v) {
+    float3 out = make_float3(mat[0][0] * v.x + mat[0][1] * v.y + mat[0][2] * v.z,
+                             mat[1][0] * v.x + mat[1][1] * v.y + mat[1][2] * v.z,
+                             mat[2][0] * v.x + mat[2][1] * v.y + mat[2][2] * v.z);
+    return out;
+}
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
+    float3 rgb = make_float3(phantom_log1_to_linear(p_R), phantom_log1_to_linear(p_G), phantom_log1_to_linear(p_B));
+    // Gain estimated to match the default Rec709 decode.
+    const float gain = 3.0;
+    rgb *= gain;
+
+    // Used values calculated from http://color.support/colorspacecalculator.html
+    // source color space Rec709 and Output ACES AP0, with Bradford chromatic adaptation.
+    float matrix[3][3] = {
+        {0.439633,  0.382989,  0.177378},
+        {0.089776,  0.813439,  0.096784},
+        {0.017541,  0.111547,  0.870912},
+    };
+    float3 rgb2 = mv_33_3(matrix, rgb);
+    return rgb2;
+}
