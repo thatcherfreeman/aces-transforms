@@ -2,18 +2,19 @@
 // Based on a clip shot on a Phantom Flex4k and decoded two ways in PCC
 DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
 
-__DEVICE__ float linear_to_phantom_log2(float x) {
+__DEVICE__ float linear_to_phantom_log2(float y) {
     const float base = 521.9552001953125;
-    const float offset = .00009969412349164486;
+    const float offset = 0.00009969412349164486;
     const float scale = 0.00181956822052598;
     const float slope = 0.03332506865262985;
     const float intercept = -0.000293954013613984;
     const float cut = 0.1716942936182022;
 
-    if (x < cut) {
-        return slope * x + intercept;
+    const float y_cut = slope * cut + intercept;
+    if (y < y_cut) {
+        return (y - intercept) / slope;
     } else {
-        return _powf(base, x) * scale + offset;
+        return _log10f((y - offset) / scale) / _log10f(base);
     }
 }
 
@@ -38,6 +39,6 @@ __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p
     const float gain = 3.0;
     rgb2 = rgb2 / gain;
 
-    float3 out = make_float3(linear_to_phantom_log2(rgb2.x), linear_to_phantom_log2(rgb2.y), linear_to_phantom_log1(rgb2.z));
+    float3 out = make_float3(linear_to_phantom_log2(rgb2.x), linear_to_phantom_log2(rgb2.y), linear_to_phantom_log2(rgb2.z));
     return out;
 }
