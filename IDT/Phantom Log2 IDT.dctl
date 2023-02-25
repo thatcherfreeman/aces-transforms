@@ -4,7 +4,11 @@ DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
 
 __DEVICE__ float phantom_log2_to_linear(float x) {
     const float base = 521.9552001953125;
+<<<<<<< HEAD
     const float offset = 0.00009969412349164486;
+=======
+    const float offset = .00009969412349164486;
+>>>>>>> 3707a66 (phantom idts and odts, wip)
     const float scale = 0.00181956822052598;
     const float slope = 0.03332506865262985;
     const float intercept = -0.000293954013613984;
