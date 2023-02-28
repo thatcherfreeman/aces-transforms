@@ -1,0 +1,48 @@
+DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+
+/**
+ * ACES AP0 to Leica L-Log conversion.
+ * Goes from scene linear, ACES AP0 gamut
+ * to L-Log and L-Log gamut (equivalent to BT 2020 gamut).
+ *
+ * This can be used as an ODT in Resolve.
+ */
+
+__DEVICE__ inline float linear_to_llog(float x)
+{
+    const float a = 8;
+    const float b = 0.09;
+    const float c = 0.27;
+    const float d = 1.3;
+    const float e = 0.0115;
+    const float f = 0.6;
+    const float cut1 = 0.006;
+    const float cut2 = 0.1380;
+
+    if (x >= cut1) {
+        return (c * _log10f(d * x + e) + f);
+    } else {
+        return (a * x + b);
+    }
+}
+
+// Used inverse of matrix from the IDT.
+__CONSTANT__ float matrix[9] = {
+     1.49040869f, -0.26617078f, -0.22423791f,
+    -0.08016743f,  1.18216668f, -0.10199925f,
+     0.00322774f, -0.03477677f,  1.03154903f,
+};
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B)
+{
+    float r = ( matrix[0] * p_R) + ( matrix[1] * p_G) + ( matrix[2] * p_B);
+    float g = ( matrix[3] * p_R) + ( matrix[4] * p_G) + ( matrix[5] * p_B);
+    float b = ( matrix[6] * p_R) + ( matrix[7] * p_G) + ( matrix[8] * p_B);
+
+    float r2 = linear_to_llog(r);
+    float g2 = linear_to_llog(g);
+    float b2 = linear_to_llog(b);
+
+    float3 res = to_float3(r2, g2, b2);
+    return res;
+}

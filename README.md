@@ -10,6 +10,7 @@ IDTs and ODTs are provided for the following log curves/image profiles:
 - Fuji F-Log2
 - GoPro ProTune Native, Color Profile
 - GoPro ProTune Native, Flat Profile
+- Leica L-Log
 - Nikon N-Log
 - ZCAM Z-Log2
 
