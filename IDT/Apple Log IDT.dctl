@@ -1,0 +1,51 @@
+DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+
+/**
+ * Apple Log to ACES AP0 conversion.
+ * Goes from Apple Log and Apple Log gamut (equivalent to BT 2020 gamut)
+ * to scene linear, ACES AP0 gamut.
+ *
+ * This can be used as an IDT in Resolve.
+ */
+
+__DEVICE__ float apple_log_to_lin(float x) {
+    float out;
+    const float R0 = -0.05641088f;
+    const float Rt = 0.01f;
+    const float c = 47.28711236f;
+    const float b = 0.00964052f;
+    const float y = 0.08550479f;
+    const float d = 0.69336945f;
+    const float Pt = c * _powf(Rt - R0, 2.0);
+
+    if (x >= Pt) {
+        out = _exp2f((x - d) / y) - b;
+    } else if (x > 0.0) {
+        out = _sqrtf(x / c) + R0;
+    } else {
+        out = R0;
+    }
+    return out;
+}
+
+// Used values calculated from http://color.support/colorspacecalculator.html
+// source color space BT 2020 and Output ACES AP0, with Bradford chromatic
+// adaptation.
+__CONSTANT__ float matrix[9] = {
+    0.679086f, 0.157701f, 0.163213f,
+    0.046002f, 0.859055f, 0.094943f,
+    -0.000574f, 0.028468f, 0.972106f,
+};
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
+    float r = apple_log_to_lin(p_R);
+    float g = apple_log_to_lin(p_G);
+    float b = apple_log_to_lin(p_B);
+
+    float r2 = (matrix[0] * r) + (matrix[1] * g) + (matrix[2] * b);
+    float g2 = (matrix[3] * r) + (matrix[4] * g) + (matrix[5] * b);
+    float b2 = (matrix[6] * r) + (matrix[7] * g) + (matrix[8] * b);
+
+    float3 res = to_float3(r2, g2, b2);
+    return res;
+}

@@ -4,6 +4,7 @@ In this repository, I have made several IDTs and ODTs that can be used with DaVi
 ## Current supported Log curves
 IDTs and ODTs are provided for the following log curves/image profiles:
 
+- Apple Log
 - DJI D-Log
 - DaVinci Intermediate
 - Fuji F-Log
