@@ -1,6 +1,8 @@
 # ACES Transforms
 In this repository, I have made several IDTs and ODTs that can be used with DaVinci Resolve to add support for these cameras. In most cases, the IDT and ODT were based on the spec sheet provided by the camera manufacturer (this is the case when the spec sheet is in the `specs` folder). Otherwise, I have used some other method to create the transformation.
 
+Support me at: [https://www.buymeacoffee.com/thatcherfreeman](https://www.buymeacoffee.com/thatcherfreeman)
+
 ## Current supported Log curves
 IDTs and ODTs are provided for the following log curves/image profiles:
 
