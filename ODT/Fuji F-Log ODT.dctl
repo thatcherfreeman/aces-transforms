@@ -1,6 +1,7 @@
 // clang-format off
 DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
 // clang-format on
+
 /**
  * ACES AP0 to F-LOG conversion.
  * Goes from scene linear, ACES AP0 gamut
