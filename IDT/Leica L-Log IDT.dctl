@@ -1,4 +1,6 @@
+// clang-format off
 DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+// clang-format on
 
 /**
  * Leica L-Log to ACES AP0 conversion.
@@ -27,23 +29,22 @@ __DEVICE__ float llog_to_linear(float t) {
     return out;
 }
 
-// Used values calculated from http://color.support/colorspacecalculator.html
-// source color space BT 2020 and Output ACES AP0, with Bradford chromatic adaptation.
-__CONSTANT__ float matrix[9] = {
-     0.679086f, 0.157701f, 0.163213f,
-     0.046002f, 0.859055f, 0.094943f,
-    -0.000574f, 0.028468f, 0.972106f,
+// Used values calculated from https://www.colour-science.org:8010/apps/rgb_colourspace_transformation_matrix
+// source color space BT 2020 and Output ACES AP0, with CAT02 chromatic adaptation.
+__CONSTANT__ float matrix[3][3] = {
+    {0.678891150633901, 0.158868422372023, 0.162240427036943},
+    {0.045570830898022, 0.860712772028847, 0.093716397078886},
+    {-0.000485710351836, 0.025060195736250, 0.975425514615082},
 };
 
-__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B)
-{
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
     float r = llog_to_linear(p_R);
     float g = llog_to_linear(p_G);
     float b = llog_to_linear(p_B);
 
-    float r2 = ( matrix[0] * r) + ( matrix[1] * g) + ( matrix[2] * b);
-    float g2 = ( matrix[3] * r) + ( matrix[4] * g) + ( matrix[5] * b);
-    float b2 = ( matrix[6] * r) + ( matrix[7] * g) + ( matrix[8] * b);
+    float r2 = (matrix[0][0] * r) + (matrix[0][1] * g) + (matrix[0][2] * b);
+    float g2 = (matrix[1][0] * r) + (matrix[1][1] * g) + (matrix[1][2] * b);
+    float b2 = (matrix[2][0] * r) + (matrix[2][1] * g) + (matrix[2][2] * b);
 
     float3 res = to_float3(r2, g2, b2);
     return res;

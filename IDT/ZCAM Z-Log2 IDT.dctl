@@ -1,4 +1,6 @@
+// clang-format off
 DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+// clang-format on
 
 /**
  * Zlog2 to ACES AP0 conversion.
@@ -7,8 +9,7 @@ DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
  * This can be used as an IDT in Resolve.
  */
 
-__DEVICE__ inline float zlog_to_linear(float t)
-{
+__DEVICE__ inline float zlog_to_linear(float t) {
     const float a = 249.77914428710938f;
     const float b = 0.9484496712684631f;
     const float c = 0.3455176055431366f;
@@ -24,8 +25,7 @@ __DEVICE__ inline float zlog_to_linear(float t)
     }
 }
 
-__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B)
-{
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
     float r = zlog_to_linear(p_R);
     float g = zlog_to_linear(p_G);
     float b = zlog_to_linear(p_B);
@@ -43,9 +43,9 @@ __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p
     // Rows add up to less than 1 for some reason, which results in the
     // gain being increased to make up for it. This matrix was provided by
     // the official Z-CAM IDT.
-    r = ( 0.59268922f * r2) + ( 0.23980554f * g2) + ( 0.09364286f * b2);
-    g = ( 0.00782530f * r2) + ( 0.99994013f * g2) + (-0.07973914f * b2);
-    b = ( 0.06103745f * r2) + (-0.24592234f * g2) + ( 1.13939635f * b2);
+    r = (0.59268922f * r2) + (0.23980554f * g2) + (0.09364286f * b2);
+    g = (0.00782530f * r2) + (0.99994013f * g2) + (-0.07973914f * b2);
+    b = (0.06103745f * r2) + (-0.24592234f * g2) + (1.13939635f * b2);
 
     float3 res = to_float3(r, g, b);
     return res;

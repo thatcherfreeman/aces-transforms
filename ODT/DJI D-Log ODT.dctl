@@ -1,4 +1,6 @@
+// clang-format off
 DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+// clang-format on
 
 /**
  * ACES AP0 to D-LOG conversion.
@@ -8,8 +10,7 @@ DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
  * This can be used as an ODT in Resolve.
  */
 
-__DEVICE__ inline float linear_to_dlog(float x)
-{
+__DEVICE__ inline float linear_to_dlog(float x) {
     const float a = 0.9892f;
     const float b = 0.0108f;
     const float c = 0.256663f;
@@ -17,7 +18,7 @@ __DEVICE__ inline float linear_to_dlog(float x)
     const float e = 6.025f;
     const float f = 0.0929f;
     const float cut1 = 0.0078f; // Should be equal to ((cut2 - f) / e)
-    const float cut2 = 0.14f; // should be equal to (e * cut1 + f)
+    const float cut2 = 0.14f;   // should be equal to (e * cut1 + f)
 
     if (x > cut1) {
         return (c * _log10f(a * x + b) + d);
@@ -27,17 +28,16 @@ __DEVICE__ inline float linear_to_dlog(float x)
 }
 
 // Used inverse of matrix from the IDT.
-__CONSTANT__ float matrix[9] = {
-     1.473480f, -0.321718f, -0.151762f,
-    -0.095928f,  1.016516f,  0.079413f,
-     0.016883f,  0.062963f,  0.920154f,
+__CONSTANT__ float matrix[3][3] = {
+    {1.473803228934520, -0.323785805263138, -0.149988001307009},
+    {-0.095251359847220, 1.014859921995396, 0.080323292005985},
+    {0.016568685394707, 0.066597207449611, 0.917008119359153},
 };
 
-__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B)
-{
-    float r = ( matrix[0] * p_R) + ( matrix[1] * p_G) + ( matrix[2] * p_B);
-    float g = ( matrix[3] * p_R) + ( matrix[4] * p_G) + ( matrix[5] * p_B);
-    float b = ( matrix[6] * p_R) + ( matrix[7] * p_G) + ( matrix[8] * p_B);
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
+    float r = (matrix[0][0] * p_R) + (matrix[0][1] * p_G) + (matrix[0][2] * p_B);
+    float g = (matrix[1][0] * p_R) + (matrix[1][1] * p_G) + (matrix[1][2] * p_B);
+    float b = (matrix[2][0] * p_R) + (matrix[2][1] * p_G) + (matrix[2][2] * p_B);
 
     float r2 = linear_to_dlog(r);
     float g2 = linear_to_dlog(g);

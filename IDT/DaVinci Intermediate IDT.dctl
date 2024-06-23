@@ -1,4 +1,6 @@
+// clang-format off
 DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+// clang-format on
 
 /**
  * DaVinci Intermediate to ACES AP0 conversion.
@@ -8,8 +10,7 @@ DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
  * This can be used as an IDT in Resolve.
  */
 
-__DEVICE__ inline float log_to_linear(float t)
-{
+__DEVICE__ inline float log_to_linear(float t) {
     const float a = 0.0075f;
     const float b = 7.0f;
     const float c = 0.07329248f;
@@ -24,23 +25,22 @@ __DEVICE__ inline float log_to_linear(float t)
     }
 }
 
-// Used values calculated from http://color.support/colorspacecalculator.html
-// source color space DaVinci Wide Gamut and Output ACES AP0, with Bradford chromatic adaptation.
-__CONSTANT__ float matrix[9] = {
-     0.748430f,  0.166000f,  0.085570f,
-     0.021258f,  1.109520f, -0.130779f,
-    -0.091392f, -0.122732f,  1.214123f,
+// Used values calculated from https://www.colour-science.org:8010/apps/rgb_colourspace_transformation_matrix
+// source color space DaVinci Wide Gamut and Output ACES AP0, with CAT02 chromatic adaptation.
+__CONSTANT__ float matrix[3][3] = {
+    {0.748270290270679, 0.167694659549422, 0.084035050222766},
+    {0.020842123444419, 1.111904742666049, -0.132746866104714},
+    {-0.091512257422527, -0.127746712807242, 1.219258970229265},
 };
 
-__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B)
-{
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
     float r = log_to_linear(p_R);
     float g = log_to_linear(p_G);
     float b = log_to_linear(p_B);
 
-    float r2 = ( matrix[0] * r) + ( matrix[1] * g) + ( matrix[2] * b);
-    float g2 = ( matrix[3] * r) + ( matrix[4] * g) + ( matrix[5] * b);
-    float b2 = ( matrix[6] * r) + ( matrix[7] * g) + ( matrix[8] * b);
+    float r2 = (matrix[0][0] * r) + (matrix[0][1] * g) + (matrix[0][2] * b);
+    float g2 = (matrix[1][0] * r) + (matrix[1][1] * g) + (matrix[1][2] * b);
+    float b2 = (matrix[2][0] * r) + (matrix[2][1] * g) + (matrix[2][2] * b);
 
     float3 res = to_float3(r2, g2, b2);
     return res;

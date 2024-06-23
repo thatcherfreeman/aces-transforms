@@ -1,4 +1,6 @@
+// clang-format off
 DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+// clang-format on
 
 /**
  * ACES AP0 to F-LOG2 conversion.
@@ -8,15 +10,14 @@ DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
  * This can be used as an ODT in Resolve.
  */
 
-__DEVICE__ inline float linear_to_flog2(float x)
-{
+__DEVICE__ inline float linear_to_flog2(float x) {
     const float a = 5.555556f;
     const float b = 0.064829f;
     const float c = 0.245281f;
     const float d = 0.384316f;
     const float e = 8.799461f;
     const float f = 0.092864f;
-    const float cut1 = 0.000889f; // Should be equal to ((cut2 - f) / e)
+    const float cut1 = 0.000889f;          // Should be equal to ((cut2 - f) / e)
     const float cut2 = 0.100686685370811f; // should be equal to (e * cut1 + f)
 
     if (x >= cut1) {
@@ -27,17 +28,16 @@ __DEVICE__ inline float linear_to_flog2(float x)
 }
 
 // Used inverse of matrix from the IDT.
-__CONSTANT__ float matrix[9] = {
-     1.49040869f, -0.26617078f, -0.22423791f,
-    -0.08016743f,  1.18216668f, -0.10199925f,
-     0.00322774f, -0.03477677f,  1.03154903f,
+__CONSTANT__ float matrix[3][3] = {
+    {1.490868704657009, -0.268712979082956, -0.222155725704626},
+    {-0.079237210602833, 1.179368583111103, -0.100131372460806},
+    {0.002778100767079, -0.030433614631534, 1.027655513912370},
 };
 
-__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B)
-{
-    float r = ( matrix[0] * p_R) + ( matrix[1] * p_G) + ( matrix[2] * p_B);
-    float g = ( matrix[3] * p_R) + ( matrix[4] * p_G) + ( matrix[5] * p_B);
-    float b = ( matrix[6] * p_R) + ( matrix[7] * p_G) + ( matrix[8] * p_B);
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
+    float r = (matrix[0][0] * p_R) + (matrix[0][1] * p_G) + (matrix[0][2] * p_B);
+    float g = (matrix[1][0] * p_R) + (matrix[1][1] * p_G) + (matrix[1][2] * p_B);
+    float b = (matrix[2][0] * p_R) + (matrix[2][1] * p_G) + (matrix[2][2] * p_B);
 
     float r2 = linear_to_flog2(r);
     float g2 = linear_to_flog2(g);

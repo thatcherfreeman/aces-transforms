@@ -1,4 +1,6 @@
+// clang-format off
 DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+// clang-format on
 
 /**
  * D-log to ACES AP0 conversion.
@@ -8,8 +10,7 @@ DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
  * This can be used as an IDT in Resolve.
  */
 
-__DEVICE__ inline float dlog_to_linear(float t)
-{
+__DEVICE__ inline float dlog_to_linear(float t) {
     const float a = 0.9892f;
     const float b = 0.0108f;
     const float c = 0.256663f;
@@ -17,7 +18,7 @@ __DEVICE__ inline float dlog_to_linear(float t)
     const float e = 6.025f;
     const float f = 0.0929f;
     const float cut1 = 0.0078f; // Should be equal to ((cut2 - f) / e)
-    const float cut2 = 0.14f; // should be equal to (e * cut1 + f)
+    const float cut2 = 0.14f;   // should be equal to (e * cut1 + f)
 
     if (t > cut2) {
         return ((_exp10f((t - d) / c) - b) / a);
@@ -26,24 +27,23 @@ __DEVICE__ inline float dlog_to_linear(float t)
     }
 }
 
-// Used values calculated from http://color.support/colorspacecalculator.html
-// source color space D-Gamut and Output ACES AP0, with Bradford chromatic adaptation.
+// Used values calculated from https://www.colour-science.org:8010/apps/rgb_colourspace_transformation_matrix
+// source color space D-Gamut and Output ACES AP0, with CAT02 chromatic adaptation.
 // D-Gamut primaries in pdf in this repo.
 __CONSTANT__ float matrix[9] = {
-     0.691430f,  0.212906f,  0.095663f,
-     0.066597f,  1.009547f, -0.076144f,
-    -0.017244f, -0.072986f,  1.090230f,
+    {0.691309679422070, 0.214321321172847, 0.094313877486212},
+    {0.066198404984437, 1.011647299751503, -0.077841359214503},
+    {-0.017336827408772, -0.077408461427838, 1.094508313552851},
 };
 
-__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B)
-{
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
     float r = dlog_to_linear(p_R);
     float g = dlog_to_linear(p_G);
     float b = dlog_to_linear(p_B);
 
-    float r2 = ( matrix[0] * r) + ( matrix[1] * g) + ( matrix[2] * b);
-    float g2 = ( matrix[3] * r) + ( matrix[4] * g) + ( matrix[5] * b);
-    float b2 = ( matrix[6] * r) + ( matrix[7] * g) + ( matrix[8] * b);
+    float r2 = (matrix[0][0] * r) + (matrix[0][1] * g) + (matrix[0][2] * b);
+    float g2 = (matrix[1][0] * r) + (matrix[1][1] * g) + (matrix[1][2] * b);
+    float b2 = (matrix[2][0] * r) + (matrix[2][1] * g) + (matrix[2][2] * b);
 
     float3 res = to_float3(r2, g2, b2);
     return res;

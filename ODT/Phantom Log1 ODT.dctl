@@ -1,6 +1,8 @@
 // Written by Thatcher Freeman
 // Based on a clip shot on a Phantom Flex4k and decoded two ways in PCC
+// clang-format off
 DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+// clang-format on
 
 __DEVICE__ float linear_to_phantom_log1(float y) {
     const float base = 233.7124786376953;
@@ -30,9 +32,9 @@ __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p
 
     // Used inverse of the matrix in the IDT.
     float matrix[3][3] = {
-       { 2.52168493, -1.13413185, -0.38755421},
-       {-0.27647861,  1.37271938, -0.0962394 },
-       {-0.01537758, -0.15297633,  1.16835375},
+        {2.5219347298, -1.1370238965, -0.3849108336},
+        {-0.2754794279, 1.3698289786, -0.0943495507},
+        {-0.0159828700, -0.1477892341, 1.1637721042},
     };
     float3 rgb2 = mv_33_3(matrix, rgb);
 

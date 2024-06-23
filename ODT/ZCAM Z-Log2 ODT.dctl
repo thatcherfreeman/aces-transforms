@@ -1,4 +1,6 @@
+// clang-format off
 DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+// clang-format on
 
 /**
  * ACES AP0 to Zlog2 conversion ODT.
@@ -7,8 +9,7 @@ DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
  * This can be used as an ODT in Resolve.
  */
 
-__DEVICE__ inline float linear_to_zlog(float x)
-{
+__DEVICE__ inline float linear_to_zlog(float x) {
     // Approximates official zlog2 to linear conversion LUT.
     const float a = 249.77914428710938f;
     const float b = 0.9484496712684631f;
@@ -25,12 +26,11 @@ __DEVICE__ inline float linear_to_zlog(float x)
     }
 }
 
-__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B)
-{
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
     // Calculated by inverting the matrix given by Z-Cam.
-    float r2 = ( 1.71094569f * p_R) + (-0.45269318f * p_G) + (-0.17229756f * p_B);
-    float g2 = (-0.02106091f * p_R) + ( 1.02314636f * p_G) + ( 0.07333446f * p_B);
-    float b2 = (-0.09620104f * p_R) + ( 0.24508222f * p_G) + ( 0.90271589f * p_B);
+    float r2 = (1.71094569f * p_R) + (-0.45269318f * p_G) + (-0.17229756f * p_B);
+    float g2 = (-0.02106091f * p_R) + (1.02314636f * p_G) + (0.07333446f * p_B);
+    float b2 = (-0.09620104f * p_R) + (0.24508222f * p_G) + (0.90271589f * p_B);
 
     // Default is 8.0f
     const float gain = 3.6f;

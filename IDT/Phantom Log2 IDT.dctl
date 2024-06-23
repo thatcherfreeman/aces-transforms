@@ -1,6 +1,8 @@
 // Written by Thatcher Freeman
 // Based on a clip shot on a Phantom Flex4k and decoded two ways in PCC
+// clang-format off
 DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+// clang-format on
 
 __DEVICE__ float phantom_log2_to_linear(float x) {
     const float base = 521.9552001953125;
@@ -30,12 +32,12 @@ __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p
     const float gain = 3.0;
     rgb *= gain;
 
-    // Used values calculated from http://color.support/colorspacecalculator.html
-    // source color space Rec709 and Output ACES AP0, with Bradford chromatic adaptation.
+    // Used values calculated from https://www.colour-science.org:8010/apps/rgb_colourspace_transformation_matrix
+    // source color space Rec709 and Output ACES AP0, with CAT02 chromatic adaptation.
     float matrix[3][3] = {
-        {0.439633,  0.382989,  0.177378},
-        {0.089776,  0.813439,  0.096784},
-        {0.017541,  0.111547,  0.870912},
+        {0.439575684216680, 0.383912589336509, 0.176511726489679},
+        {0.089600382903921, 0.814714154206652, 0.095685462895180},
+        {0.017415482729199, 0.108734352236674, 0.873850165033623},
     };
     float3 rgb2 = mv_33_3(matrix, rgb);
     return rgb2;
