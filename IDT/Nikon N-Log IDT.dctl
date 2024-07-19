@@ -15,12 +15,12 @@ __DEVICE__ inline float powf(float base, float exp) {
  */
 
 __DEVICE__ inline float nlog_to_linear(float t) {
-    const float c = 150.0f / 1024.0f;
-    const float d = 619.0f / 1024.0f;
-    const float e = 650.0f / 1024.0f;
+    const float c = 150.0f / 1023.0f;
+    const float d = 619.0f / 1023.0f;
+    const float e = 650.0f / 1023.0f;
     const float f = 0.0075f;
     const float cut1 = 0.32876f;         // Should be equal to ((cut2 / e)^3 - f)
-    const float cut2 = 452.0f / 1024.0f; // should be equal to ((cut1 + f)^(1/3) * e)
+    const float cut2 = 452.0f / 1023.0f; // should be equal to ((cut1 + f)^(1/3) * e)
 
     if (t >= cut2) {
         return _expf((t - d) / c);
