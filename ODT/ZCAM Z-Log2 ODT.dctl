@@ -43,6 +43,6 @@ __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p
     g2 = linear_to_zlog(g);
     b2 = linear_to_zlog(b);
 
-    float3 res = to_float3(r2, g2, b2);
+    float3 res = make_float3(r2, g2, b2);
     return res;
 }

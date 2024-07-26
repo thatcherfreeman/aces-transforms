@@ -47,6 +47,6 @@ __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p
     g = (0.00782530f * r2) + (0.99994013f * g2) + (-0.07973914f * b2);
     b = (0.06103745f * r2) + (-0.24592234f * g2) + (1.13939635f * b2);
 
-    float3 res = to_float3(r, g, b);
+    float3 res = make_float3(r, g, b);
     return res;
 }

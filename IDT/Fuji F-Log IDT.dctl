@@ -44,6 +44,6 @@ __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p
     float g2 = (matrix[1][0] * r) + (matrix[1][1] * g) + (matrix[1][2] * b);
     float b2 = (matrix[2][0] * r) + (matrix[2][1] * g) + (matrix[2][2] * b);
 
-    float3 res = to_float3(r2, g2, b2);
+    float3 res = make_float3(r2, g2, b2);
     return res;
 }

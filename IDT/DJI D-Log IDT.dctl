@@ -30,7 +30,7 @@ __DEVICE__ inline float dlog_to_linear(float t) {
 // Used values calculated from https://www.colour-science.org:8010/apps/rgb_colourspace_transformation_matrix
 // source color space D-Gamut and Output ACES AP0, with CAT02 chromatic adaptation.
 // D-Gamut primaries in pdf in this repo.
-__CONSTANT__ float matrix[9] = {
+__CONSTANT__ float matrix[3][3] = {
     {0.691309679422070, 0.214321321172847, 0.094313877486212},
     {0.066198404984437, 1.011647299751503, -0.077841359214503},
     {-0.017336827408772, -0.077408461427838, 1.094508313552851},
@@ -45,6 +45,6 @@ __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p
     float g2 = (matrix[1][0] * r) + (matrix[1][1] * g) + (matrix[1][2] * b);
     float b2 = (matrix[2][0] * r) + (matrix[2][1] * g) + (matrix[2][2] * b);
 
-    float3 res = to_float3(r2, g2, b2);
+    float3 res = make_float3(r2, g2, b2);
     return res;
 }
