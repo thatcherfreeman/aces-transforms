@@ -257,15 +257,15 @@ __DEVICE__ void calc_sat_adjust_matrix(float M[3][3], float sat, float3 rgb2Y) {
     // based on the luminance of the input.
     //
     M[0][0] = (1.0 - sat) * rgb2Y.x + sat;
-    M[0][1] = (1.0 - sat) * rgb2Y.x;
-    M[0][2] = (1.0 - sat) * rgb2Y.x;
+    M[1][0] = (1.0 - sat) * rgb2Y.x;
+    M[2][0] = (1.0 - sat) * rgb2Y.x;
 
-    M[1][0] = (1.0 - sat) * rgb2Y.y;
+    M[0][1] = (1.0 - sat) * rgb2Y.y;
     M[1][1] = (1.0 - sat) * rgb2Y.y + sat;
-    M[1][2] = (1.0 - sat) * rgb2Y.y;
+    M[2][1] = (1.0 - sat) * rgb2Y.y;
 
-    M[2][0] = (1.0 - sat) * rgb2Y.z;
-    M[2][1] = (1.0 - sat) * rgb2Y.z;
+    M[0][2] = (1.0 - sat) * rgb2Y.z;
+    M[1][2] = (1.0 - sat) * rgb2Y.z;
     M[2][2] = (1.0 - sat) * rgb2Y.z + sat;
 }
 
