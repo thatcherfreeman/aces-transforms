@@ -305,7 +305,7 @@ __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p
     // --- Global desaturation --- //
     float RRT_SAT_MAT[3][3] = {};
     // AP1 XYZ Y coefficients
-    const float3 AP1_RGB2Y = make_float3(0.134004206456, 0.674081765811, 0.004060733529);
+    const float3 AP1_RGB2Y = make_float3(0.272228716781, 0.674081765811, 0.053689517408);
     calc_sat_adjust_matrix(RRT_SAT_MAT, RRT_SAT_FACTOR, AP1_RGB2Y);
     rgbPre = mv_33_3(RRT_SAT_MAT, rgbPre);
 
