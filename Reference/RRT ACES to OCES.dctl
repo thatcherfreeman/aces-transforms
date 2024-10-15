@@ -167,6 +167,10 @@ __DEVICE__ float3 mv_33_3(float mat[3][3], float3 v) {
     return out;
 }
 
+__DEVICE__ float dot_f3_f3(float3 a, float3 b) {
+    return (a.x * b.x + a.y * b.y + a.z * b.z);
+}
+
 struct SplineMapPoint {
         float x;
         float y;
@@ -181,10 +185,6 @@ struct SegmentedSplineParams_c5 {
         float slopeLow;          // log-log slope of low linear extension
         float slopeHigh;         // log-log slope of high linear extension
 };
-
-__DEVICE__ float dot_f3_f3(float3 a, float3 b) {
-    return (a.x * b.x + a.y * b.y + a.z * b.z);
-}
 
 __DEVICE__ float segmented_spline_c5_fwd(float x) {
 
@@ -323,8 +323,7 @@ __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p
     };
     float3 rgbOces = mv_33_3(AP1_2_AP0_MAT, rgbPost);
 
-    // rgb0ces is in nits, so 100 nits is literally 100.0. Let's divide this by 100 so that it's more in Resolve's domain, where 100 nits
-    // is 1.0.
-    float3 out = rgbOces / 100.0;
+    // rgb0ces is in nits, so 100 nits is literally 100.0.
+    float3 out = rgbOces;
     return out;
 }

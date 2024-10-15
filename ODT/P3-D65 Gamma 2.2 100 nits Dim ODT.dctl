@@ -1,0 +1,576 @@
+
+// clang-format off
+DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+// clang-format on
+
+//
+// Summary :
+//  This transform is intended for mapping OCES onto a P3 D65 Gamma 2.2 monitor
+//  that is calibrated to a D65 white point at 100 cd/m^2. The assumed observer
+//  adapted white is D65, and the viewing environment is a dim surround.
+//
+// Device Primaries :
+//  Primaries are those specified in P3
+//  CIE 1931 chromaticities:  x         y         Y
+//              Red:          0.680     0.320
+//              Green:        0.265     0.690
+//              Blue:         0.15      0.06
+//              White:        0.3127    0.329     100 cd/m^2
+//
+// Display EOTF : Pure gamma 2.2
+//
+// Signal Range:
+//    By default, this transform outputs full range code values.
+//
+// Assumed observer adapted white point:
+//         CIE 1931 chromaticities:    x            y
+//                                     0.3127       0.329
+//
+// Viewing Environment:
+//   This ODT has a compensation for viewing environment variables more typical
+//   of those associated with video mastering (Dim surround).
+//
+
+__DEVICE__ float3 mv_33_3(float mat[3][3], float3 v) {
+    // matrix * vector multiplication
+    float3 out = make_float3(mat[0][0] * v.x + mat[0][1] * v.y + mat[0][2] * v.z,
+                             mat[1][0] * v.x + mat[1][1] * v.y + mat[1][2] * v.z,
+                             mat[2][0] * v.x + mat[2][1] * v.y + mat[2][2] * v.z);
+    return out;
+}
+
+__DEVICE__ float dot_f3_f3(float3 a, float3 b) {
+    return (a.x * b.x + a.y * b.y + a.z * b.z);
+}
+
+struct SplineMapPoint {
+        float x;
+        float y;
+};
+
+struct SegmentedSplineParams_c5 {
+        float coefsLow[6];       // coefs for B-spline between minPoint and midPoint (units of log luminance)
+        float coefsHigh[6];      // coefs for B-spline between midPoint and maxPoint (units of log luminance)
+        SplineMapPoint minPoint; // {luminance, luminance} linear extension below this
+        SplineMapPoint midPoint; // {luminance, luminance}
+        SplineMapPoint maxPoint; // {luminance, luminance} linear extension above this
+        float slopeLow;          // log-log slope of low linear extension
+        float slopeHigh;         // log-log slope of high linear extension
+};
+
+struct SegmentedSplineParams_c9 {
+        float coefsLow[10];      // coefs for B-spline between minPoint and midPoint (units of log luminance)
+        float coefsHigh[10];     // coefs for B-spline between midPoint and maxPoint (units of log luminance)
+        SplineMapPoint minPoint; // {luminance, luminance} linear extension below this
+        SplineMapPoint midPoint; // {luminance, luminance}
+        SplineMapPoint maxPoint; // {luminance, luminance} linear extension above this
+        float slopeLow;          // log-log slope of low linear extension
+        float slopeHigh;         // log-log slope of high linear extension
+};
+
+__DEVICE__ float segmented_spline_c5_fwd(float x) {
+
+    const SegmentedSplineParams_c5 RRT_PARAMS = {
+        // coefsLow[6]
+        {-4.0000000000, -4.0000000000, -3.1573765773, -0.4852499958, 1.8477324706, 1.8477324706},
+        // coefsHigh[6]
+        {-0.7185482425, 2.0810307172, 3.6681241237, 4.0000000000, 4.0000000000, 4.0000000000},
+        {0.18 * _powf(2., -15.0), 0.0001}, // minPoint
+        {0.18, 4.8},                       // midPoint
+        {0.18 * _powf(2., 18.0), 10000.},  // maxPoint
+        0.0,                               // slopeLow
+        0.0                                // slopeHigh
+    };
+    SegmentedSplineParams_c5 C = RRT_PARAMS;
+
+    // Textbook monomial to basis-function conversion matrix. (transpose of the one in the original code.)
+    float M[3][3] = {
+        {0.5, -1.0, 0.5},
+        {-1.0, 1.0, 0.0},
+        {0.5, 0.5, 0.0},
+    };
+
+    const int N_KNOTS_LOW = 4;
+    const int N_KNOTS_HIGH = 4;
+
+    // Check for negatives or zero before taking the log. If negative or zero,
+    // set to HALF_MIN.
+    float logx = _log10f(_fmaxf(x, 1e-10));
+
+    float logy;
+
+    if (logx <= _log10f(C.minPoint.x)) {
+
+        logy = logx * C.slopeLow + (_log10f(C.minPoint.y) - C.slopeLow * _log10f(C.minPoint.x));
+
+    } else if ((logx > _log10f(C.minPoint.x)) && (logx < _log10f(C.midPoint.x))) {
+
+        float knot_coord = (N_KNOTS_LOW - 1) * (logx - _log10f(C.minPoint.x)) / (_log10f(C.midPoint.x) - _log10f(C.minPoint.x));
+        int j = knot_coord;
+        float t = knot_coord - j;
+
+        float3 cf = make_float3(C.coefsLow[j], C.coefsLow[j + 1], C.coefsLow[j + 2]);
+
+        float3 monomials = make_float3(t * t, t, 1.);
+        logy = dot_f3_f3(monomials, mv_33_3(M, cf));
+
+    } else if ((logx >= _log10f(C.midPoint.x)) && (logx < _log10f(C.maxPoint.x))) {
+
+        float knot_coord = (N_KNOTS_HIGH - 1) * (logx - _log10f(C.midPoint.x)) / (_log10f(C.maxPoint.x) - _log10f(C.midPoint.x));
+        int j = knot_coord;
+        float t = knot_coord - j;
+
+        float3 cf = make_float3(C.coefsHigh[j], C.coefsHigh[j + 1], C.coefsHigh[j + 2]);
+
+        float3 monomials = make_float3(t * t, t, 1.);
+        logy = dot_f3_f3(monomials, mv_33_3(M, cf));
+
+    } else { // if ( logIn >= _log10f(C.maxPoint.x) ) {
+
+        logy = logx * C.slopeHigh + (_log10f(C.maxPoint.y) - C.slopeHigh * _log10f(C.maxPoint.x));
+    }
+
+    return _powf(10.0, logy);
+}
+
+float segmented_spline_c9_fwd(float x) {
+
+    const SegmentedSplineParams_c9 ODT_48nits = {
+        // coefsLow[10]
+        {-1.6989700043,
+         -1.6989700043,
+         -1.4779000000,
+         -1.2291000000,
+         -0.8648000000,
+         -0.4480000000,
+         0.0051800000,
+         0.4511080334,
+         0.9113744414,
+         0.9113744414},
+        // coefsHigh[10]
+        {0.5154386965,
+         0.8470437783,
+         1.1358000000,
+         1.3802000000,
+         1.5197000000,
+         1.5985000000,
+         1.6467000000,
+         1.6746091357,
+         1.6878733390,
+         1.6878733390},
+        {segmented_spline_c5_fwd(0.18 * _powf(2., -6.5)), 0.02}, // minPoint
+        {segmented_spline_c5_fwd(0.18), 4.8},                    // midPoint
+        {segmented_spline_c5_fwd(0.18 * _powf(2., 6.5)), 48.0},  // maxPoint
+        0.0,                                                     // slopeLow
+        0.04                                                     // slopeHigh
+    };
+    SegmentedSplineParams_c9 C = ODT_48nits;
+    float M[3][3] = {
+        {0.5, -1.0, 0.5},
+        {-1.0, 1.0, 0.0},
+        {0.5, 0.5, 0.0},
+    };
+
+    const int N_KNOTS_LOW = 8;
+    const int N_KNOTS_HIGH = 8;
+
+    // Check for negatives or zero before taking the log. If negative or zero,
+    // set to HALF_MIN.
+    float logx = _log10f(_fmaxf(x, 1e-10));
+
+    float logy;
+
+    if (logx <= _log10f(C.minPoint.x)) {
+
+        logy = logx * C.slopeLow + (_log10f(C.minPoint.y) - C.slopeLow * _log10f(C.minPoint.x));
+
+    } else if ((logx > _log10f(C.minPoint.x)) && (logx < _log10f(C.midPoint.x))) {
+
+        float knot_coord = (N_KNOTS_LOW - 1) * (logx - _log10f(C.minPoint.x)) / (_log10f(C.midPoint.x) - _log10f(C.minPoint.x));
+        int j = knot_coord;
+        float t = knot_coord - j;
+
+        float3 cf = make_float3(C.coefsLow[j], C.coefsLow[j + 1], C.coefsLow[j + 2]);
+
+        float3 monomials = make_float3(t * t, t, 1.);
+        logy = dot_f3_f3(monomials, mv_33_3(M, cf));
+
+    } else if ((logx >= _log10f(C.midPoint.x)) && (logx < _log10f(C.maxPoint.x))) {
+
+        float knot_coord = (N_KNOTS_HIGH - 1) * (logx - _log10f(C.midPoint.x)) / (_log10f(C.maxPoint.x) - _log10f(C.midPoint.x));
+        int j = knot_coord;
+        float t = knot_coord - j;
+
+        float3 cf = make_float3(C.coefsHigh[j], C.coefsHigh[j + 1], C.coefsHigh[j + 2]);
+
+        float3 monomials = {t * t, t, 1.};
+        logy = dot_f3_f3(monomials, mv_33_3(M, cf));
+
+    } else { // if ( logIn >= _log10f(C.maxPoint.x) ) {
+
+        logy = logx * C.slopeHigh + (_log10f(C.maxPoint.y) - C.slopeHigh * _log10f(C.maxPoint.x));
+    }
+
+    return _powf(10.0, logy);
+}
+
+__DEVICE__ float Y_2_linCV(float Y, float Ymax, float Ymin) {
+    return (Y - Ymin) / (Ymax - Ymin);
+}
+
+#define CINEMA_WHITE (48.0)
+#define CINEMA_BLACK (0.02)
+#define DIM_SURROUND_GAMMA (0.9811)
+
+__DEVICE__ float3 clamp_min(float3 rgb, float min_val) {
+    return make_float3(_fmaxf(rgb.x, min_val), _fmaxf(rgb.y, min_val), _fmaxf(rgb.z, min_val));
+}
+
+__DEVICE__ float3 clamp_f3(float3 rgb, float min, float max) {
+    return make_float3(_clampf(rgb.x, min, max), _clampf(rgb.y, min, max), _clampf(rgb.z, min, max));
+}
+
+__DEVICE__ float3 XYZ_2_xyY(float3 xyz) {
+    if (xyz.y == 0.0) {
+        return make_float3(1.0 / 3.0, 1.0 / 3.0, 0.0);
+    }
+    float sum = xyz.x + xyz.y + xyz.z;
+    float x = xyz.x / sum;
+    float y = xyz.y / sum;
+    float Y = xyz.y;
+    return make_float3(x, y, Y);
+}
+
+__DEVICE__ float3 xyY_2_XYZ(float3 xyY) {
+    float3 xyz = make_float3(xyY.x / xyY.y, 1.0, (1.0 - xyY.x - xyY.y) / xyY.y);
+    if (xyY.y == 0.0) {
+        xyz = make_float3(xyY.x, 0.0, 1.0 - xyY.x);
+    }
+    xyz *= xyY.z;
+    return xyz;
+}
+
+__DEVICE__ float3 darkSurround_to_dimSurround(float3 linearCV) {
+    float AP1_2_XYZ_MAT[3][3] = {
+        {0.662454181109, 0.134004206456, 0.156187687005},
+        {0.272228716781, 0.674081765811, 0.053689517408},
+        {-0.005574649490, 0.004060733529, 1.010339100313},
+    };
+    float XYZ_2_AP1_MAT[3][3] = {
+        {1.641023379694, -0.324803294185, -0.236424695238},
+        {-0.663662858723, 1.615331591657, 0.016756347686},
+        {0.011721894328, -0.008284441996, 0.988394858539},
+    };
+    float3 XYZ = mv_33_3(AP1_2_XYZ_MAT, linearCV);
+
+    float3 xyY = XYZ_2_xyY(XYZ);
+    xyY.z = _fmaxf(xyY.z, 0.);
+    xyY.z = _powf(xyY.z, DIM_SURROUND_GAMMA);
+    XYZ = xyY_2_XYZ(xyY);
+
+    return mv_33_3(XYZ_2_AP1_MAT, XYZ);
+}
+
+__DEVICE__ void calc_sat_adjust_matrix(float M[3][3], float sat, float3 rgb2Y) {
+    //
+    // This function determines the terms for a 3x3 saturation matrix that is
+    // based on the luminance of the input.
+    //
+    M[0][0] = (1.0 - sat) * rgb2Y.x + sat;
+    M[1][0] = (1.0 - sat) * rgb2Y.x;
+    M[2][0] = (1.0 - sat) * rgb2Y.x;
+
+    M[0][1] = (1.0 - sat) * rgb2Y.y;
+    M[1][1] = (1.0 - sat) * rgb2Y.y + sat;
+    M[2][1] = (1.0 - sat) * rgb2Y.y;
+
+    M[0][2] = (1.0 - sat) * rgb2Y.z;
+    M[1][2] = (1.0 - sat) * rgb2Y.z;
+    M[2][2] = (1.0 - sat) * rgb2Y.z + sat;
+}
+
+#define ODT_SAT_FACTOR (0.93)
+
+// Stuff needed for RRT:
+
+__DEVICE__ float max_f3(float3 rgb) {
+    return _fmaxf(rgb.x, _fmaxf(rgb.y, rgb.z));
+}
+
+__DEVICE__ float min_f3(float3 rgb) {
+    return _fminf(rgb.x, _fminf(rgb.y, rgb.z));
+}
+
+__DEVICE__ float rgb_2_saturation(float3 rgb) {
+    const float TINY = 1e-10;
+    return (_fmaxf(max_f3(rgb), TINY) - _fmaxf(min_f3(rgb), TINY)) / _fmaxf(max_f3(rgb), 1e-2);
+}
+
+__DEVICE__ float rgb_2_yc(float3 rgb) {
+    const float ycRadiusWeight = 1.75;
+    // Converts RGB to a luminance proxy, here called YC
+    // YC is ~ Y + K * Chroma
+    // Constant YC is a cone-shaped surface in RGB space, with the tip on the
+    // neutral axis, towards white.
+    // YC is normalized: RGB 1 1 1 maps to YC = 1
+    //
+    // ycRadiusWeight defaults to 1.75, although can be overridden in function
+    // call to rgb_2_yc
+    // ycRadiusWeight = 1 -> YC for pure cyan, magenta, yellow == YC for neutral
+    // of same value
+    // ycRadiusWeight = 2 -> YC for pure red, green, blue  == YC for  neutral of
+    // same value.
+
+    float r = rgb.x;
+    float g = rgb.y;
+    float b = rgb.z;
+
+    float chroma = _sqrtf(b * (b - g) + g * (g - r) + r * (r - b));
+
+    return (b + g + r + ycRadiusWeight * chroma) / 3.0;
+}
+
+__DEVICE__ float sign(float x) {
+    if (x < 0.0f) {
+        return -1.0f;
+    } else {
+        return 1.0f;
+    }
+}
+
+__DEVICE__ float sigmoid_shaper(float x) {
+    // Sigmoid function in the range 0 to 1 spanning -2 to +2.
+
+    float t = _fmaxf(1. - _fabs(x / 2.), 0.);
+    float y = 1. + sign(x) * (1. - t * t);
+
+    return y / 2.;
+}
+
+__DEVICE__ float glow_fwd(float ycIn, float glowGainIn, float glowMid) {
+    float glowGainOut;
+
+    if (ycIn <= 2. / 3. * glowMid) {
+        glowGainOut = glowGainIn;
+    } else if (ycIn >= 2. * glowMid) {
+        glowGainOut = 0.;
+    } else {
+        glowGainOut = glowGainIn * (glowMid / ycIn - 1. / 2.);
+    }
+
+    return glowGainOut;
+}
+
+#define FLT_NAN (1.0 / 0.0)
+#ifndef M_PI
+#define M_PI (3.14159265358979323f)
+#endif
+
+// Transformations from RGB to other color representations
+__DEVICE__ float rgb_2_hue(float3 rgb) {
+    // Returns a geometric hue angle in degrees (0-360) based on RGB values.
+    // For neutral colors, hue is undefined and the function will return a quiet NaN value.
+    float hue;
+    if (rgb.x == rgb.y && rgb.y == rgb.z) {
+        hue = FLT_NAN; // RGB triplets where RGB are equal have an undefined hue
+    } else {
+        hue = (180. / M_PI) * _atan2f(_sqrtf(3.0) * (rgb.y - rgb.z), 2 * rgb.x - rgb.y - rgb.z);
+    }
+
+    if (hue < 0.) {
+        hue = hue + 360.;
+    }
+
+    return hue;
+}
+
+__DEVICE__ float center_hue(float hue, float centerH) {
+    float hueCentered = hue - centerH;
+    if (hueCentered < -180.) {
+        hueCentered = hueCentered + 360.;
+    } else if (hueCentered > 180.) {
+        hueCentered = hueCentered - 360.;
+    }
+    return hueCentered;
+}
+
+#define RRT_GLOW_GAIN (0.05)
+#define RRT_GLOW_MID (0.08)
+#define RRT_RED_PIVOT (0.03)
+#define RRT_RED_WIDTH (135.0)
+#define RRT_RED_HUE (0.0)
+#define RRT_SAT_FACTOR (0.96)
+#define RRT_RED_SCALE (0.82)
+
+// ------- Red modifier functions
+__DEVICE__ float cubic_basis_shaper(float x, float w) {
+    float M[4][4] = {{-1. / 6, 3. / 6, -3. / 6, 1. / 6},
+                     {3. / 6, -6. / 6, 3. / 6, 0. / 6},
+                     {-3. / 6, 0. / 6, 3. / 6, 0. / 6},
+                     {1. / 6, 4. / 6, 1. / 6, 0. / 6}};
+
+    float knots[5] = {-w / 2., -w / 4., 0., w / 4., w / 2.};
+
+    float y = 0;
+    if ((x > knots[0]) && (x < knots[4])) {
+        float knot_coord = (x - knots[0]) * 4. / w;
+        int j = knot_coord;
+        float t = knot_coord - j;
+
+        float monomials[4] = {t * t * t, t * t, t, 1.};
+
+        // (if/else structure required for compatibility with CTL < v1.5.)
+        if (j == 3) {
+            y = monomials[0] * M[0][0] + monomials[1] * M[1][0] + monomials[2] * M[2][0] + monomials[3] * M[3][0];
+        } else if (j == 2) {
+            y = monomials[0] * M[0][1] + monomials[1] * M[1][1] + monomials[2] * M[2][1] + monomials[3] * M[3][1];
+        } else if (j == 1) {
+            y = monomials[0] * M[0][2] + monomials[1] * M[1][2] + monomials[2] * M[2][2] + monomials[3] * M[3][2];
+        } else if (j == 0) {
+            y = monomials[0] * M[0][3] + monomials[1] * M[1][3] + monomials[2] * M[2][3] + monomials[3] * M[3][3];
+        } else {
+            y = 0.0;
+        }
+    }
+
+    return y * 3 / 2.;
+}
+
+__DEVICE__ float3 RRT(float3 aces) {
+    // --- Glow module --- //
+    float saturation = rgb_2_saturation(aces);
+    float ycIn = rgb_2_yc(aces);
+    float s = sigmoid_shaper((saturation - 0.4) / 0.2);
+    float addedGlow = 1. + glow_fwd(ycIn, RRT_GLOW_GAIN * s, RRT_GLOW_MID);
+
+    aces = addedGlow * aces;
+
+    // --- Red modifier --- //
+    float hue = rgb_2_hue(aces);
+    float centeredHue = center_hue(hue, RRT_RED_HUE);
+    float hueWeight = cubic_basis_shaper(centeredHue, RRT_RED_WIDTH);
+
+    aces.x = aces.x + hueWeight * saturation * (RRT_RED_PIVOT - aces.x) * (1. - RRT_RED_SCALE);
+
+    // --- ACES to RGB rendering space --- //
+    aces = clamp_min(aces, 0.); // avoids saturated negative colors from becoming positive in the matrix
+
+    float AP0_2_AP1_MAT[3][3] = {
+        {1.451439316072, -0.236510746889, -0.214928569308},
+        {-0.076553773314, 1.176229699812, -0.099675926450},
+        {0.008316148425, -0.006032449791, 0.997716301413},
+    };
+
+    float3 rgbPre = mv_33_3(AP0_2_AP1_MAT, aces);
+
+    rgbPre = clamp_min(rgbPre, 0.);
+
+    // --- Global desaturation --- //
+    float RRT_SAT_MAT[3][3] = {};
+    // AP1 XYZ Y coefficients
+    const float3 AP1_RGB2Y = make_float3(0.272228716781, 0.674081765811, 0.053689517408);
+    calc_sat_adjust_matrix(RRT_SAT_MAT, RRT_SAT_FACTOR, AP1_RGB2Y);
+    rgbPre = mv_33_3(RRT_SAT_MAT, rgbPre);
+
+    // --- Apply the tonescale independently in rendering-space RGB --- //
+    float3 rgbPost;
+    rgbPost.x = segmented_spline_c5_fwd(rgbPre.x);
+    rgbPost.y = segmented_spline_c5_fwd(rgbPre.y);
+    rgbPost.z = segmented_spline_c5_fwd(rgbPre.z);
+
+    // --- RGB rendering space to OCES --- //
+    float AP1_2_AP0_MAT[3][3] = {
+        {0.695452241359, 0.140678696471, 0.163869062214},
+        {0.044794563352, 0.859671118443, 0.095534318210},
+        {-0.005525882558, 0.004025210306, 1.001500672252},
+    };
+    float3 rgbOces = mv_33_3(AP1_2_AP0_MAT, rgbPost);
+
+    // rgb0ces is in nits, so 100 nits is literally 100.0.
+    float3 out = rgbOces;
+    return out;
+}
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
+    const float DISPGAMMA = 2.2;
+
+    float XYZ_2_DISPLAY_PRI_MAT[3][3] = {
+        {2.493496911941, -0.931383617919, -0.402710784451},
+        {-0.829488969562, 1.762664060318, 0.023624685842},
+        {0.035845830244, -0.076172389268, 0.956884524008},
+    };
+    float AP0_2_AP1_MAT[3][3] = {
+        {1.451439316072, -0.236510746889, -0.214928569308},
+        {-0.076553773314, 1.176229699812, -0.099675926450},
+        {0.008316148425, -0.006032449791, 0.997716301413},
+    };
+    float AP1_2_XYZ_MAT[3][3] = {
+        {0.662454181109, 0.134004206456, 0.156187687005},
+        {0.272228716781, 0.674081765811, 0.053689517408},
+        {-0.005574649490, 0.004060733529, 1.010339100313},
+    };
+    // // ACES to D65 adaptation matrix with Bradford CAT
+    float D60_2_D65_CAT[3][3] = {
+        {0.989499, -0.006432, 0.016933},
+        {-0.007239, 1.001861, 0.005377},
+        {0.002688, -0.004679, 1.001992},
+    };
+
+    float3 aces = make_float3(p_R, p_G, p_B);
+    float3 oces = RRT(aces);
+
+    // OCES to RGB rendering space
+    float3 rgbPre = mv_33_3(AP0_2_AP1_MAT, oces);
+
+    // Apply the tonescale independently in rendering-space RGB
+    float3 rgbPost;
+    rgbPost.x = segmented_spline_c9_fwd(rgbPre.x);
+    rgbPost.y = segmented_spline_c9_fwd(rgbPre.y);
+    rgbPost.z = segmented_spline_c9_fwd(rgbPre.z);
+
+    // Scale luminance to linear code value
+    float3 linearCV;
+    linearCV.x = Y_2_linCV(rgbPost.x, CINEMA_WHITE, CINEMA_BLACK);
+    linearCV.y = Y_2_linCV(rgbPost.y, CINEMA_WHITE, CINEMA_BLACK);
+    linearCV.z = Y_2_linCV(rgbPost.z, CINEMA_WHITE, CINEMA_BLACK);
+
+    // Apply gamma adjustment to compensate for dim surround
+    linearCV = darkSurround_to_dimSurround(linearCV);
+
+    // Apply desaturation to compensate for luminance difference
+    float ODT_SAT_MAT[3][3] = {};
+    // AP1 XYZ Y coefficients
+    const float3 AP1_RGB2Y = make_float3(0.272228716781, 0.674081765811, 0.053689517408);
+    calc_sat_adjust_matrix(ODT_SAT_MAT, ODT_SAT_FACTOR, AP1_RGB2Y);
+    linearCV = mv_33_3(ODT_SAT_MAT, linearCV);
+
+    // // Convert to display primary encoding
+    // // Rendering space RGB to XYZ
+    // float3 XYZ = mv_33_3(AP1_2_XYZ_MAT, linearCV);
+    // // Apply CAT from ACES white point to assumed observer adapted white point
+    // XYZ = mv_33_3(D60_2_D65_CAT, XYZ);
+    // // CIE XYZ to display primaries
+    // linearCV = mv_33_3(XYZ_2_DISPLAY_PRI_MAT, XYZ);
+
+    // Above three steps combined into a single matrix.
+    float AP1_TO_DISPLAY_PRI_MAT[3][3] = {
+        {1.379214128253, -0.308864144674, -0.070349983580},
+        {-0.069334858381, 1.082296746002, -0.012961887621},
+        {-0.002159009514, -0.045459324837, 1.047618334351},
+    };
+    linearCV = mv_33_3(AP1_TO_DISPLAY_PRI_MAT, linearCV);
+
+    // Handle out-of-gamut values
+    // Clip values < 0 or > 1 (i.e. projecting outside the display primaries)
+    linearCV = clamp_f3(linearCV, 0., 1.);
+
+    // Encode linear code values with transfer function
+    float3 outputCV;
+    outputCV.x = _powf(linearCV.x, 1.0 / DISPGAMMA);
+    outputCV.y = _powf(linearCV.y, 1.0 / DISPGAMMA);
+    outputCV.z = _powf(linearCV.z, 1.0 / DISPGAMMA);
+
+    // Skip legal levels conversion.
+
+    return outputCV;
+}

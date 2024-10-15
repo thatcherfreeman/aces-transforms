@@ -19,6 +19,9 @@ IDTs and ODTs are provided for the following log curves/image profiles:
 - Phantom Log2
 - ZCAM Z-Log2
 
+## Display ODTs
+The RRT and Display transform code is pretty directly lifted straight from [ACES 1.3](https://github.com/ampas/aces-core/tree/1256fee50ee35548c6eab8eca854ff3349008489/).
+
 ## Installing ACES Transform DCTLs in DaVinci Resolve
 Download the IDTs and ODTs folders. On Windows and MacOS, put their contents in the `IDT` and `ODT` folders located in the following directories:
 ```

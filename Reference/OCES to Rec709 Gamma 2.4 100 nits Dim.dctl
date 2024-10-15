@@ -3,13 +3,6 @@
 DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
 // clang-format on
 
-// <ACEStransformID>urn:ampas:aces:transformId:v1.5:ODT.Academy.Rec709_100nits_dim.a1.0.3</ACEStransformID>
-// <ACESuserName>ACES 1.0 Output - Rec.709</ACESuserName>
-
-//
-// Output Device Transform - Rec709
-//
-
 //
 // Summary :
 //  This transform is intended for mapping OCES onto a Rec.709 broadcast monitor
@@ -31,10 +24,7 @@ DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
 //  Rec. ITU-R BT.1886.
 //
 // Signal Range:
-//    By default, this transform outputs full range code values. If instead a
-//    SMPTE "legal" signal is desired, there is a runtime flag to output
-//    SMPTE legal signal. In ctlrender, this can be achieved by appending
-//    '-param1 legalRange 1' after the '-ctl odt.ctl' string.
+//    By default, this transform outputs full range code values.
 //
 // Assumed observer adapted white point:
 //         CIE 1931 chromaticities:    x            y
@@ -42,7 +32,7 @@ DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
 //
 // Viewing Environment:
 //   This ODT has a compensation for viewing environment variables more typical
-//   of those associated with video mastering.
+//   of those associated with video mastering (Dim surround).
 //
 
 __DEVICE__ float3 mv_33_3(float mat[3][3], float3 v) {
@@ -303,7 +293,6 @@ __DEVICE__ void calc_sat_adjust_matrix(float M[3][3], float sat, float3 rgb2Y) {
     M[2][2] = (1.0 - sat) * rgb2Y.z + sat;
 }
 
-
 #define ODT_SAT_FACTOR (0.93)
 
 float bt1886_r(float L, float gamma, float Lw, float Lb) {
@@ -342,7 +331,8 @@ __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p
         {0.002688, -0.004679, 1.001992},
     };
 
-    float3 oces = make_float3(p_R, p_G, p_B) * 100.0;
+    // Oces is set so that each unit of 1.0 is one nit.
+    float3 oces = make_float3(p_R, p_G, p_B);
 
     // OCES to RGB rendering space
     float3 rgbPre = mv_33_3(AP0_2_AP1_MAT, oces);
@@ -379,9 +369,9 @@ __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p
 
     // Above three steps combined into a single matrix.
     float AP1_TO_DISPLAY_PRI_MAT[3][3] = {
-        { 1.705050992658, -0.621792120657, -0.083258872001},
-        {-0.130256417507,  1.140804736575, -0.010548319068},
-        {-0.024003356805, -0.128968976065,  1.152972332870},
+        {1.705050992658, -0.621792120657, -0.083258872001},
+        {-0.130256417507, 1.140804736575, -0.010548319068},
+        {-0.024003356805, -0.128968976065, 1.152972332870},
     };
     linearCV = mv_33_3(AP1_TO_DISPLAY_PRI_MAT, linearCV);
 
