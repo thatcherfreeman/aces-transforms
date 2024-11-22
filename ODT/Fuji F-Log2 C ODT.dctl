@@ -1,0 +1,48 @@
+// clang-format off
+DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+// clang-format on
+
+/**
+ * ACES AP0 to F-LOG2 C conversion.
+ * Goes from scene linear, ACES AP0 gamut
+ * to F-Log2 and F-Log2 C gamut.
+ *
+ * This can be used as an ODT in Resolve.
+ */
+
+__DEVICE__ inline float linear_to_flog2c(float x) {
+    const float a = 5.555556f;
+    const float b = 0.064829f;
+    const float c = 0.245281f;
+    const float d = 0.384316f;
+    const float e = 8.799461f;
+    const float f = 0.092864f;
+    const float cut1 = 0.000889f;          // Should be equal to ((cut2 - f) / e)
+    const float cut2 = 0.100686685370811f; // should be equal to (e * cut1 + f)
+
+    if (x >= cut1) {
+        return (c * _log10f(a * x + b) + d);
+    } else {
+        return (e * x + f);
+    }
+}
+
+// Used inverse of matrix from the IDT.
+__CONSTANT__ float matrix[3][3] = {
+    {1.189141, -0.032615, -0.156526},
+    {-0.001081, 0.992700, 0.008381},
+    {0.000664, 0.000752, 0.998584},
+};
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
+    float r = (matrix[0][0] * p_R) + (matrix[0][1] * p_G) + (matrix[0][2] * p_B);
+    float g = (matrix[1][0] * p_R) + (matrix[1][1] * p_G) + (matrix[1][2] * p_B);
+    float b = (matrix[2][0] * p_R) + (matrix[2][1] * p_G) + (matrix[2][2] * p_B);
+
+    float r2 = linear_to_flog2c(r);
+    float g2 = linear_to_flog2c(g);
+    float b2 = linear_to_flog2c(b);
+
+    float3 res = make_float3(r2, g2, b2);
+    return res;
+}

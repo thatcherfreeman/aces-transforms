@@ -11,6 +11,7 @@ IDTs and ODTs are provided for the following log curves/image profiles:
 - DaVinci Intermediate
 - Fuji F-Log
 - Fuji F-Log2
+- Fuji F-Log2 C
 - GoPro ProTune Native, Color Profile
 - GoPro ProTune Native, Flat Profile
 - Leica L-Log
