@@ -42,3 +42,12 @@ or on Windows:
 C:\Users\<your username>\AppData\Roaming\Blackmagic Design\DaVinci Resolve\Support\ACES Transforms\ODT\
 ```
 Once you've done that, restart Resolve and they should show up in the ACES Transform node and in the color mangement settings.
+
+## Linear to Log Conversions
+If you're starting from linear EXR files and have a resize step to get to your timeline resolution, and your resize algorithm selected in Resolve is one that sharpens the image and therefore has negative lobes (ie "Sharper", Lacsoz, etc), then this resize step will push negative values into the image. As a result, you need to resize while in a log space.
+
+If you're in node-based color management, the only opportunities you have to do that linear to log conversion are:
+1. Right click on a clip and choose an "Input LUT", and choose a DCTL that converts from linear to some log space. The selected Input LUT is applied to the clip's source resolution and therefore lies before Edit Sizing/Color Page Input Sizing.
+2. Use the Fusion page to handle the conversion (slow)
+
+For your convenience, I have created a folder called "Linear to Log Conversions" that you can put into your conventional LUT directory and therefore make these DCTLs accessible via the Input LUT right click menu.

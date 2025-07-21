@@ -1,0 +1,42 @@
+// clang-format off
+// clang-format on
+
+/**
+ * ACES AP0 to ACEScct AP1 conversion.
+ * Goes from scene linear, ACES AP0 gamut
+ * to ACEScct and AP1 primaries
+ *
+ * This can be used as an ODT in Resolve.
+ */
+
+__DEVICE__ float linear_to_acescct(float in) {
+    const float X_BRK = 0.0078125f;
+    const float Y_BRK = 0.155251141552511f;
+    const float A = 10.5402377416545f;
+    const float B = 0.0729055341958355f;
+    if (in <= X_BRK) {
+        return A * in + B;
+    } else { // (in > X_BRK)
+        return (_log2f(in) + 9.72f) / 17.52f;
+    }
+}
+
+// Used inverse of matrix from the IDT.
+__CONSTANT__ float matrix[3][3] = {
+    {1.451439316072, -0.236510746889, -0.214928569308},
+    {-0.076553773314, 1.176229699812, -0.099675926450},
+    {0.008316148425, -0.006032449791, 0.997716301413},
+};
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
+    float r = (matrix[0][0] * p_R) + (matrix[0][1] * p_G) + (matrix[0][2] * p_B);
+    float g = (matrix[1][0] * p_R) + (matrix[1][1] * p_G) + (matrix[1][2] * p_B);
+    float b = (matrix[2][0] * p_R) + (matrix[2][1] * p_G) + (matrix[2][2] * p_B);
+
+    float r2 = linear_to_acescct(r);
+    float g2 = linear_to_acescct(g);
+    float b2 = linear_to_acescct(b);
+
+    float3 res = make_float3(r2, g2, b2);
+    return res;
+}
