@@ -5,8 +5,6 @@
  * ACES AP0 to ACEScct AP1 conversion.
  * Goes from scene linear, ACES AP0 gamut
  * to ACEScct and AP1 primaries
- *
- * This can be used as an ODT in Resolve.
  */
 
 __DEVICE__ float linear_to_acescct(float in) {

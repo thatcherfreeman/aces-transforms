@@ -5,8 +5,6 @@
  * ACES AP0 to DaVinci Intermediate conversion.
  * Goes from scene linear, ACES AP0 gamut
  * to DaVinci Intermediate and DaVinci Wide Gamut.
- *
- * This can be used as an ODT in Resolve.
  */
 
 __DEVICE__ inline float linear_to_log(float x) {
