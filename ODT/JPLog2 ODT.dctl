@@ -1,0 +1,41 @@
+// clang-format off
+DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+// clang-format on
+
+/**
+ * ACES AP0 to JPLog2 conversion.
+ * Goes from scene linear, ACES AP0 gamut
+ * to JPLog2 and ACES AP1 gamut.
+ *
+ * This can be used as an ODT in Resolve.
+ */
+__DEVICE__ float linear_to_jplog2(float in) {
+    const float JPLOG2_LIN_BRKPNT = 0.00680;
+    const float JPLOG2_LOG_BRKPNT = 0.16129; /* 10bit cv = 165 */
+    const float JPLOG2_LINTOLOG_SLOPE = 10.367739;
+    const float JPLOG2_LINTOLOG_YINT = 0.0907775;
+    if (in <= JPLOG2_LIN_BRKPNT)
+        return JPLOG2_LINTOLOG_SLOPE * in + JPLOG2_LINTOLOG_YINT;
+    else /* if (in > JPLOG2_LIN_BRKPNT) */
+        return (_log2f(in) + 10.5f) / 20.46f;
+}
+
+// Used inverse of matrix from the IDT.
+__CONSTANT__ float matrix[3][3] = {
+    {1.451439316071658 ,-0.236510746889360, -0.214928569308364},
+    {-0.076553773314263,  1.176229699811789, -0.099675926450361},
+    { 0.008316148424961, -0.006032449790909,  0.997716301412982},
+};
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
+    float r = (matrix[0][0] * p_R) + (matrix[0][1] * p_G) + (matrix[0][2] * p_B);
+    float g = (matrix[1][0] * p_R) + (matrix[1][1] * p_G) + (matrix[1][2] * p_B);
+    float b = (matrix[2][0] * p_R) + (matrix[2][1] * p_G) + (matrix[2][2] * p_B);
+
+    float r2 = linear_to_jplog2(r);
+    float g2 = linear_to_jplog2(g);
+    float b2 = linear_to_jplog2(b);
+
+    float3 res = make_float3(r2, g2, b2);
+    return res;
+}

@@ -14,6 +14,7 @@ IDTs and ODTs are provided for the following log curves/image profiles:
 - Fuji F-Log2 C
 - GoPro ProTune Native, Color Profile
 - GoPro ProTune Native, Flat Profile
+- JPLog2
 - Leica L-Log
 - Nikon N-Log
 - Phantom Log1
@@ -51,3 +52,6 @@ If you're in node-based color management, the only opportunities you have to do 
 2. Use the Fusion page to handle the conversion (slow)
 
 For your convenience, I have created a folder called "Linear to Log Conversions" that you can put into your conventional LUT directory and therefore make these DCTLs accessible via the Input LUT right click menu.
+
+## Matrix calculator
+I used [this too](https://www.colour-science.org:8010/apps/rgb_colourspace_transformation_matrix) to calculate the matrices here. Set it to CAT02 chromatic adaptation.

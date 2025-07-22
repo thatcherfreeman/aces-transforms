@@ -1,0 +1,43 @@
+// clang-format off
+DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+// clang-format on
+
+/**
+ * JPLog2 to ACES AP0 conversion.
+ * Goes from JPLog2 and ACES AP1 gamut
+ * to scene linear, ACES AP0 gamut.
+ *
+ * This can be used as an IDT in Resolve.
+ */
+
+__DEVICE__ float jplog2_to_linear(float in) {
+    const float JPLOG2_LIN_BRKPNT = 0.00680;
+    const float JPLOG2_LOG_BRKPNT = 0.16129; /* 10bit cv = 165 */
+    const float JPLOG2_LINTOLOG_SLOPE = 10.367739;
+    const float JPLOG2_LINTOLOG_YINT = 0.0907775;
+    if (in <= JPLOG2_LOG_BRKPNT)
+        return (in - JPLOG2_LINTOLOG_YINT) / JPLOG2_LINTOLOG_SLOPE;
+    else /* if (in > JPLOG2_LOG_BRKPNT) */
+        return _powf(2.0, in * 20.46 - 10.5);
+}
+
+// Used values calculated from https://www.colour-science.org:8010/apps/rgb_colourspace_transformation_matrix
+// source color space is ACES AP1 and Output ACES AP0, with CAT02 chromatic adaptation.
+__CONSTANT__ float matrix[3][3] = [
+    { 0.695452241358568,  0.140678696470730,  0.163869062213569},
+    { 0.044794563352499,  0.859671118442969,  0.095534318210286},
+    {-0.005525882558111,  0.004025210305977,  1.001500672251630},
+];
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
+    float r = jplog2_to_linear(p_R);
+    float g = jplog2_to_linear(p_G);
+    float b = jplog2_to_linear(p_B);
+
+    float r2 = (matrix[0][0] * r) + (matrix[0][1] * g) + (matrix[0][2] * b);
+    float g2 = (matrix[1][0] * r) + (matrix[1][1] * g) + (matrix[1][2] * b);
+    float b2 = (matrix[2][0] * r) + (matrix[2][1] * g) + (matrix[2][2] * b);
+
+    float3 res = make_float3(r2, g2, b2);
+    return res;
+}
