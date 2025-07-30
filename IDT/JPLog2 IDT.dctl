@@ -24,9 +24,9 @@ __DEVICE__ float jplog2_to_linear(float in) {
 // Used values calculated from https://www.colour-science.org:8010/apps/rgb_colourspace_transformation_matrix
 // source color space is ACES AP1 and Output ACES AP0, with CAT02 chromatic adaptation.
 __CONSTANT__ float matrix[3][3] = [
-    { 0.695452241358568,  0.140678696470730,  0.163869062213569},
-    { 0.044794563352499,  0.859671118442969,  0.095534318210286},
-    {-0.005525882558111,  0.004025210305977,  1.001500672251630},
+    {0.695452241358568, 0.140678696470730, 0.163869062213569},
+    {0.044794563352499, 0.859671118442969, 0.095534318210286},
+    {-0.005525882558111, 0.004025210305977, 1.001500672251630},
 ];
 
 __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {

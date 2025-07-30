@@ -7,7 +7,7 @@
  * to DaVinci Intermediate and DaVinci Wide Gamut.
  */
 
-__DEVICE__ inline float linear_to_log(float x) {
+__DEVICE__ inline float linear_to_di(float x) {
     const float a = 0.0075f;
     const float b = 7.0f;
     const float c = 0.07329248f;
@@ -23,9 +23,9 @@ __DEVICE__ inline float linear_to_log(float x) {
 }
 
 __CONSTANT__ float matrix[3][3] = {
-    {0.914854961265100,  0.002844565439738,  0.082300473295161},
-    {0.031184511763026,  0.783316306943601,  0.185499181293374},
-    {0.067400184075931,  0.085586088566144,  0.847013727357926},
+    {0.914854961265100, 0.002844565439738, 0.082300473295161},
+    {0.031184511763026, 0.783316306943601, 0.185499181293374},
+    {0.067400184075931, 0.085586088566144, 0.847013727357926},
 };
 
 __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
@@ -33,9 +33,9 @@ __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p
     float g = (matrix[1][0] * p_R) + (matrix[1][1] * p_G) + (matrix[1][2] * p_B);
     float b = (matrix[2][0] * p_R) + (matrix[2][1] * p_G) + (matrix[2][2] * p_B);
 
-    float r2 = linear_to_log(r);
-    float g2 = linear_to_log(g);
-    float b2 = linear_to_log(b);
+    float r2 = linear_to_di(r);
+    float g2 = linear_to_di(g);
+    float b2 = linear_to_di(b);
 
     float3 res = make_float3(r2, g2, b2);
     return res;

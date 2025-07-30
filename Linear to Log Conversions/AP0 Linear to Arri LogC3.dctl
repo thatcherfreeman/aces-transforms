@@ -1,0 +1,43 @@
+// clang-format off
+// clang-format on
+
+/**
+ * ACES AP0 to Arri LogC3 conversion.
+ * Goes from scene linear, ACES AP0 gamut
+ * to Arri Wide Gamut 3 and Arri LogC3 with CAT02 CAT.
+ */
+
+__DEVICE__ inline float linear_to_logc3(float x) {
+    float cut = 0.010591;
+    float a = 5.555556;
+    float b = 0.052272;
+    float c = 0.247190;
+    float d = 0.385537;
+    float e = 5.367655;
+    float f = 0.092809;
+
+    if (x > cut) {
+        return c * _log10f(a * x + b) + d;
+    } else {
+        return e * x + f;
+    }
+}
+
+__CONSTANT__ float matrix[3][3] = {
+    {1.515986382880304, -0.361341858775327, -0.154644459192209},
+    {-0.128327579942774, 1.019314587274880, 0.109012394850350},
+    {-0.010510756064671, 0.060832932482313, 0.949676495363624},
+};
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
+    float r = (matrix[0][0] * p_R) + (matrix[0][1] * p_G) + (matrix[0][2] * p_B);
+    float g = (matrix[1][0] * p_R) + (matrix[1][1] * p_G) + (matrix[1][2] * p_B);
+    float b = (matrix[2][0] * p_R) + (matrix[2][1] * p_G) + (matrix[2][2] * p_B);
+
+    float r2 = linear_to_logc3(r);
+    float g2 = linear_to_logc3(g);
+    float b2 = linear_to_logc3(b);
+
+    float3 res = make_float3(r2, g2, b2);
+    return res;
+}
