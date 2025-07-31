@@ -55,4 +55,4 @@ If you're in node-based color management, the only opportunities you have to do 
 For your convenience, I have created a folder called "Linear to Log Conversions" that you can put into your conventional LUT directory and therefore make these DCTLs accessible via the Input LUT right click menu.
 
 ## Matrix calculator
-I used [this too](https://www.colour-science.org:8010/apps/rgb_colourspace_transformation_matrix) to calculate the matrices here. Set it to CAT02 chromatic adaptation.
+I used [this tool](https://www.colour-science.org:8010/apps/rgb_colourspace_transformation_matrix) to calculate the matrices here. Set it to CAT02 chromatic adaptation.
