@@ -31,7 +31,7 @@ Download the IDTs and ODTs folders. On Windows and MacOS, put their contents in 
 %AppData%\Roaming\Blackmagic Design\DaVinci Resolve\Support\ACES Transforms\
 
 (MacOS)
-~/Library/Application Support/Blackmagic Design/DaVinci Resolve/ACES Transforms/
+[YOUR USER DIRECTORY]/Library/Application Support/Blackmagic Design/DaVinci Resolve/ACES Transforms/
 ```
 
 For example, place the `Fuji F-Log ODT.dctl` file in the following folder on MacOS:
