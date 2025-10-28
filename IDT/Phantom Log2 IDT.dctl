@@ -1,22 +1,24 @@
 // Written by Thatcher Freeman
-// Based on a clip shot on a Phantom Flex4k and decoded two ways in PCC
+// Based on official documentation.
 // clang-format off
 DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
 // clang-format on
 
 __DEVICE__ float phantom_log2_to_linear(float x) {
-    const float base = 521.9552001953125;
-    const float offset = 0.00009969412349164486;
-    const float scale = 0.00181956822052598;
-    const float slope = 0.03332506865262985;
-    const float intercept = -0.000293954013613984;
-    const float cut = 0.1716942936182022;
+    const float a = 0.158f;
+    const float b = 30.0f;
+    const float c = 0.004938f;
+    const float d = 0.0f;
+    const float e = 0.459732f;
+    const float s = 32.0f;
 
-    if (x < cut) {
-        return slope * x + intercept;
+    float out;
+    if (x < s * c) {
+        out = x / s;
     } else {
-        return _powf(base, x) * scale + offset;
+        out = (_expf((x - e) / a) - d) / b;
     }
+    return out;
 }
 
 __DEVICE__ float3 mv_33_3(float mat[3][3], float3 v) {
@@ -29,7 +31,7 @@ __DEVICE__ float3 mv_33_3(float mat[3][3], float3 v) {
 __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
     float3 rgb = make_float3(phantom_log2_to_linear(p_R), phantom_log2_to_linear(p_G), phantom_log2_to_linear(p_B));
     // Gain estimated to match the default Rec709 decode.
-    const float gain = 3.0;
+    const float gain = _exp2f(1.55f);
     rgb *= gain;
 
     // Used values calculated from https://www.colour-science.org:8010/apps/rgb_colourspace_transformation_matrix

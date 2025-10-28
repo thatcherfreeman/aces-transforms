@@ -4,21 +4,23 @@
 DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
 // clang-format on
 
-__DEVICE__ float linear_to_phantom_log2(float y) {
-    const float base = 521.9552001953125;
-    const float offset = 0.00009969412349164486;
-    const float scale = 0.00181956822052598;
-    const float slope = 0.03332506865262985;
-    const float intercept = -0.000293954013613984;
-    const float cut = 0.1716942936182022;
+__DEVICE__ float linear_to_phantom_log2(float x) {
+    const float a = 0.158f;
+    const float b = 30.0f;
+    const float c = 0.004938f;
+    const float d = 0.0f;
+    const float e = 0.459732f;
+    const float s = 32.0f;
 
-    const float y_cut = slope * cut + intercept;
-    if (y < y_cut) {
-        return (y - intercept) / slope;
+    float out;
+    if (x < c) {
+        out = s * x;
     } else {
-        return _log10f((y - offset) / scale) / _log10f(base);
+        out = a * _logf(b * x + d) + e;
     }
+    return out;
 }
+
 
 __DEVICE__ float3 mv_33_3(float mat[3][3], float3 v) {
     float3 out = make_float3(mat[0][0] * v.x + mat[0][1] * v.y + mat[0][2] * v.z,
@@ -38,7 +40,7 @@ __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p
     };
     float3 rgb2 = mv_33_3(matrix, rgb);
 
-    const float gain = 3.0;
+    const float gain = _exp2f(1.55f);
     rgb2 = rgb2 / gain;
 
     float3 out = make_float3(linear_to_phantom_log2(rgb2.x), linear_to_phantom_log2(rgb2.y), linear_to_phantom_log2(rgb2.z));
