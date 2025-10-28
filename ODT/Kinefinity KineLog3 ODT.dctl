@@ -29,9 +29,9 @@ __DEVICE__ float linear_to_kinelog3(float x) {
 
 // Used inverse of matrix from the IDT.
 __CONSTANT__ float matrix[3][3] = {
-    {1.3499406708, -0.2513475588, -0.0985931121},
-    {0.0550315158, 0.7786290543, 0.1663394299},
-    {0.0008687002, 0.1884585315, 0.8106727683},
+    {1.3499406708f, -0.2513475588f, -0.0985931121f},
+    {0.0550315158f, 0.7786290543f, 0.1663394299f},
+    {0.0008687002f, 0.1884585315f, 0.8106727683f},
 };
 
 __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {

@@ -28,9 +28,9 @@ __DEVICE__ inline float log_to_linear(float t) {
 // Used values calculated from https://www.colour-science.org:8010/apps/rgb_colourspace_transformation_matrix
 // source color space DaVinci Wide Gamut and Output ACES AP0, with CAT02 chromatic adaptation.
 __CONSTANT__ float matrix[3][3] = {
-    {0.748270290270679, 0.167694659549422, 0.084035050222766},
-    {0.020842123444419, 1.111904742666049, -0.132746866104714},
-    {-0.091512257422527, -0.127746712807242, 1.219258970229265},
+    {0.748270290270679f, 0.167694659549422f, 0.084035050222766f},
+    {0.020842123444419f, 1.111904742666049f, -0.132746866104714f},
+    {-0.091512257422527f, -0.127746712807242f, 1.219258970229265f},
 };
 
 __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {

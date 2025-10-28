@@ -76,22 +76,22 @@ __DEVICE__ float segmented_spline_c5_fwd(float x) {
 
     const SegmentedSplineParams_c5 RRT_PARAMS = {
         // coefsLow[6]
-        {-4.0000000000, -4.0000000000, -3.1573765773, -0.4852499958, 1.8477324706, 1.8477324706},
+        {-4.0000000000f, -4.0000000000f, -3.1573765773f, -0.4852499958f, 1.8477324706f, 1.8477324706f},
         // coefsHigh[6]
-        {-0.7185482425, 2.0810307172, 3.6681241237, 4.0000000000, 4.0000000000, 4.0000000000},
-        {0.18 * _powf(2., -15.0), 0.0001}, // minPoint
-        {0.18, 4.8},                       // midPoint
-        {0.18 * _powf(2., 18.0), 10000.},  // maxPoint
-        0.0,                               // slopeLow
-        0.0                                // slopeHigh
+        {-0.7185482425f, 2.0810307172f, 3.6681241237f, 4.0000000000f, 4.0000000000f, 4.0000000000f},
+        {0.18f * _powf(2.f, -15.0f), 0.0001f}, // minPoint
+        {0.18f, 4.8f},                       // midPoint
+        {0.18f * _powf(2.f, 18.0f), 10000.f},  // maxPoint
+        0.0f,                               // slopeLow
+        0.0f                                // slopeHigh
     };
     SegmentedSplineParams_c5 C = RRT_PARAMS;
 
     // Textbook monomial to basis-function conversion matrix. (transpose of the one in the original code.)
     float M[3][3] = {
-        {0.5, -1.0, 0.5},
-        {-1.0, 1.0, 0.0},
-        {0.5, 0.5, 0.0},
+        {0.5f, -1.0f, 0.5f},
+        {-1.0f, 1.0f, 0.0f},
+        {0.5f, 0.5f, 0.0f},
     };
 
     const int N_KNOTS_LOW = 4;
@@ -99,7 +99,7 @@ __DEVICE__ float segmented_spline_c5_fwd(float x) {
 
     // Check for negatives or zero before taking the log. If negative or zero,
     // set to HALF_MIN.
-    float logx = _log10f(_fmaxf(x, 1e-10));
+    float logx = _log10f(_fmaxf(x, 1e-10f));
 
     float logy;
 
@@ -115,7 +115,7 @@ __DEVICE__ float segmented_spline_c5_fwd(float x) {
 
         float3 cf = make_float3(C.coefsLow[j], C.coefsLow[j + 1], C.coefsLow[j + 2]);
 
-        float3 monomials = make_float3(t * t, t, 1.);
+        float3 monomials = make_float3(t * t, t, 1.f);
         logy = dot_f3_f3(monomials, mv_33_3(M, cf));
 
     } else if ((logx >= _log10f(C.midPoint.x)) && (logx < _log10f(C.maxPoint.x))) {
@@ -126,7 +126,7 @@ __DEVICE__ float segmented_spline_c5_fwd(float x) {
 
         float3 cf = make_float3(C.coefsHigh[j], C.coefsHigh[j + 1], C.coefsHigh[j + 2]);
 
-        float3 monomials = make_float3(t * t, t, 1.);
+        float3 monomials = make_float3(t * t, t, 1.f);
         logy = dot_f3_f3(monomials, mv_33_3(M, cf));
 
     } else { // if ( logIn >= _log10f(C.maxPoint.x) ) {
@@ -134,45 +134,45 @@ __DEVICE__ float segmented_spline_c5_fwd(float x) {
         logy = logx * C.slopeHigh + (_log10f(C.maxPoint.y) - C.slopeHigh * _log10f(C.maxPoint.x));
     }
 
-    return _powf(10.0, logy);
+    return _powf(10.0f, logy);
 }
 
 float segmented_spline_c9_fwd(float x) {
 
     const SegmentedSplineParams_c9 ODT_48nits = {
         // coefsLow[10]
-        {-1.6989700043,
-         -1.6989700043,
-         -1.4779000000,
-         -1.2291000000,
-         -0.8648000000,
-         -0.4480000000,
-         0.0051800000,
-         0.4511080334,
-         0.9113744414,
-         0.9113744414},
+        {-1.6989700043f,
+         -1.6989700043f,
+         -1.4779000000f,
+         -1.2291000000f,
+         -0.8648000000f,
+         -0.4480000000f,
+         0.0051800000f,
+         0.4511080334f,
+         0.9113744414f,
+         0.9113744414f},
         // coefsHigh[10]
-        {0.5154386965,
-         0.8470437783,
-         1.1358000000,
-         1.3802000000,
-         1.5197000000,
-         1.5985000000,
-         1.6467000000,
-         1.6746091357,
-         1.6878733390,
-         1.6878733390},
-        {segmented_spline_c5_fwd(0.18 * _powf(2., -6.5)), 0.02}, // minPoint
-        {segmented_spline_c5_fwd(0.18), 4.8},                    // midPoint
-        {segmented_spline_c5_fwd(0.18 * _powf(2., 6.5)), 48.0},  // maxPoint
-        0.0,                                                     // slopeLow
-        0.04                                                     // slopeHigh
+        {0.5154386965f,
+         0.8470437783f,
+         1.1358000000f,
+         1.3802000000f,
+         1.5197000000f,
+         1.5985000000f,
+         1.6467000000f,
+         1.6746091357f,
+         1.6878733390f,
+         1.6878733390f},
+        {segmented_spline_c5_fwd(0.18f * _powf(2.f, -6.5f)), 0.02f}, // minPoint
+        {segmented_spline_c5_fwd(0.18f), 4.8f},                    // midPoint
+        {segmented_spline_c5_fwd(0.18f * _powf(2.f, 6.5f)), 48.0f},  // maxPoint
+        0.0f,                                                     // slopeLow
+        0.04f                                                     // slopeHigh
     };
     SegmentedSplineParams_c9 C = ODT_48nits;
     float M[3][3] = {
-        {0.5, -1.0, 0.5},
-        {-1.0, 1.0, 0.0},
-        {0.5, 0.5, 0.0},
+        {0.5f, -1.0f, 0.5f},
+        {-1.0f, 1.0f, 0.0f},
+        {0.5f, 0.5f, 0.0f},
     };
 
     const int N_KNOTS_LOW = 8;
@@ -180,7 +180,7 @@ float segmented_spline_c9_fwd(float x) {
 
     // Check for negatives or zero before taking the log. If negative or zero,
     // set to HALF_MIN.
-    float logx = _log10f(_fmaxf(x, 1e-10));
+    float logx = _log10f(_fmaxf(x, 1e-10f));
 
     float logy;
 
@@ -196,7 +196,7 @@ float segmented_spline_c9_fwd(float x) {
 
         float3 cf = make_float3(C.coefsLow[j], C.coefsLow[j + 1], C.coefsLow[j + 2]);
 
-        float3 monomials = make_float3(t * t, t, 1.);
+        float3 monomials = make_float3(t * t, t, 1.f);
         logy = dot_f3_f3(monomials, mv_33_3(M, cf));
 
     } else if ((logx >= _log10f(C.midPoint.x)) && (logx < _log10f(C.maxPoint.x))) {
@@ -207,7 +207,7 @@ float segmented_spline_c9_fwd(float x) {
 
         float3 cf = make_float3(C.coefsHigh[j], C.coefsHigh[j + 1], C.coefsHigh[j + 2]);
 
-        float3 monomials = {t * t, t, 1.};
+        float3 monomials = {t * t, t, 1.f};
         logy = dot_f3_f3(monomials, mv_33_3(M, cf));
 
     } else { // if ( logIn >= _log10f(C.maxPoint.x) ) {
@@ -215,16 +215,16 @@ float segmented_spline_c9_fwd(float x) {
         logy = logx * C.slopeHigh + (_log10f(C.maxPoint.y) - C.slopeHigh * _log10f(C.maxPoint.x));
     }
 
-    return _powf(10.0, logy);
+    return _powf(10.0f, logy);
 }
 
 __DEVICE__ float Y_2_linCV(float Y, float Ymax, float Ymin) {
     return (Y - Ymin) / (Ymax - Ymin);
 }
 
-#define CINEMA_WHITE (48.0)
-#define CINEMA_BLACK (0.02)
-#define DIM_SURROUND_GAMMA (0.9811)
+#define CINEMA_WHITE (48.0f)
+#define CINEMA_BLACK (0.02f)
+#define DIM_SURROUND_GAMMA (0.9811f)
 
 __DEVICE__ float3 clamp_min(float3 rgb, float min_val) {
     return make_float3(_fmaxf(rgb.x, min_val), _fmaxf(rgb.y, min_val), _fmaxf(rgb.z, min_val));
@@ -235,8 +235,8 @@ __DEVICE__ float3 clamp_f3(float3 rgb, float min, float max) {
 }
 
 __DEVICE__ float3 XYZ_2_xyY(float3 xyz) {
-    if (xyz.y == 0.0) {
-        return make_float3(1.0 / 3.0, 1.0 / 3.0, 0.0);
+    if (xyz.y == 0.0f) {
+        return make_float3(1.0f / 3.0f, 1.0f / 3.0f, 0.0f);
     }
     float sum = xyz.x + xyz.y + xyz.z;
     float x = xyz.x / sum;
@@ -246,9 +246,9 @@ __DEVICE__ float3 XYZ_2_xyY(float3 xyz) {
 }
 
 __DEVICE__ float3 xyY_2_XYZ(float3 xyY) {
-    float3 xyz = make_float3(xyY.x / xyY.y, 1.0, (1.0 - xyY.x - xyY.y) / xyY.y);
-    if (xyY.y == 0.0) {
-        xyz = make_float3(xyY.x, 0.0, 1.0 - xyY.x);
+    float3 xyz = make_float3(xyY.x / xyY.y, 1.0f, (1.0f - xyY.x - xyY.y) / xyY.y);
+    if (xyY.y == 0.0f) {
+        xyz = make_float3(xyY.x, 0.0f, 1.0f - xyY.x);
     }
     xyz *= xyY.z;
     return xyz;
@@ -256,19 +256,19 @@ __DEVICE__ float3 xyY_2_XYZ(float3 xyY) {
 
 __DEVICE__ float3 darkSurround_to_dimSurround(float3 linearCV) {
     float AP1_2_XYZ_MAT[3][3] = {
-        {0.662454181109, 0.134004206456, 0.156187687005},
-        {0.272228716781, 0.674081765811, 0.053689517408},
-        {-0.005574649490, 0.004060733529, 1.010339100313},
+        {0.662454181109f, 0.134004206456f, 0.156187687005f},
+        {0.272228716781f, 0.674081765811f, 0.053689517408f},
+        {-0.005574649490f, 0.004060733529f, 1.010339100313f},
     };
     float XYZ_2_AP1_MAT[3][3] = {
-        {1.641023379694, -0.324803294185, -0.236424695238},
-        {-0.663662858723, 1.615331591657, 0.016756347686},
-        {0.011721894328, -0.008284441996, 0.988394858539},
+        {1.641023379694f, -0.324803294185f, -0.236424695238f},
+        {-0.663662858723f, 1.615331591657f, 0.016756347686f},
+        {0.011721894328f, -0.008284441996f, 0.988394858539f},
     };
     float3 XYZ = mv_33_3(AP1_2_XYZ_MAT, linearCV);
 
     float3 xyY = XYZ_2_xyY(XYZ);
-    xyY.z = _fmaxf(xyY.z, 0.);
+    xyY.z = _fmaxf(xyY.z, 0.f);
     xyY.z = _powf(xyY.z, DIM_SURROUND_GAMMA);
     XYZ = xyY_2_XYZ(xyY);
 
@@ -280,55 +280,55 @@ __DEVICE__ void calc_sat_adjust_matrix(float M[3][3], float sat, float3 rgb2Y) {
     // This function determines the terms for a 3x3 saturation matrix that is
     // based on the luminance of the input.
     //
-    M[0][0] = (1.0 - sat) * rgb2Y.x + sat;
-    M[1][0] = (1.0 - sat) * rgb2Y.x;
-    M[2][0] = (1.0 - sat) * rgb2Y.x;
+    M[0][0] = (1.0f - sat) * rgb2Y.x + sat;
+    M[1][0] = (1.0f - sat) * rgb2Y.x;
+    M[2][0] = (1.0f - sat) * rgb2Y.x;
 
-    M[0][1] = (1.0 - sat) * rgb2Y.y;
-    M[1][1] = (1.0 - sat) * rgb2Y.y + sat;
-    M[2][1] = (1.0 - sat) * rgb2Y.y;
+    M[0][1] = (1.0f - sat) * rgb2Y.y;
+    M[1][1] = (1.0f - sat) * rgb2Y.y + sat;
+    M[2][1] = (1.0f - sat) * rgb2Y.y;
 
-    M[0][2] = (1.0 - sat) * rgb2Y.z;
-    M[1][2] = (1.0 - sat) * rgb2Y.z;
-    M[2][2] = (1.0 - sat) * rgb2Y.z + sat;
+    M[0][2] = (1.0f - sat) * rgb2Y.z;
+    M[1][2] = (1.0f - sat) * rgb2Y.z;
+    M[2][2] = (1.0f - sat) * rgb2Y.z + sat;
 }
 
-#define ODT_SAT_FACTOR (0.93)
+#define ODT_SAT_FACTOR (0.93f)
 
 float bt1886_r(float L, float gamma, float Lw, float Lb) {
     // The reference EOTF specified in Rec. ITU-R BT.1886
     // L = a(max[(V+b),0])^g
-    float a = _powf(_powf(Lw, 1. / gamma) - _powf(Lb, 1. / gamma), gamma);
-    float b = _powf(Lb, 1. / gamma) / (_powf(Lw, 1. / gamma) - _powf(Lb, 1. / gamma));
-    float V = _powf(_fmaxf(L / a, 0.), 1. / gamma) - b;
+    float a = _powf(_powf(Lw, 1.f / gamma) - _powf(Lb, 1.f / gamma), gamma);
+    float b = _powf(Lb, 1.f / gamma) / (_powf(Lw, 1.f / gamma) - _powf(Lb, 1.f / gamma));
+    float V = _powf(_fmaxf(L / a, 0.f), 1.f / gamma) - b;
     return V;
 }
 
 __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
-    const float DISPGAMMA = 2.4;
-    const float L_W = 1.0;
-    const float L_B = 0.0;
+    const float DISPGAMMA = 2.4f;
+    const float L_W = 1.0f;
+    const float L_B = 0.0f;
 
     float XYZ_2_DISPLAY_PRI_MAT[3][3] = {
-        {3.240969941905, -1.537383177570, -0.498610760293},
-        {-0.969243636281, 1.875967501508, 0.041555057407},
-        {0.055630079697, -0.203976958889, 1.056971514243},
+        {3.240969941905f, -1.537383177570f, -0.498610760293f},
+        {-0.969243636281f, 1.875967501508f, 0.041555057407f},
+        {0.055630079697f, -0.203976958889f, 1.056971514243f},
     };
     float AP0_2_AP1_MAT[3][3] = {
-        {1.451439316072, -0.236510746889, -0.214928569308},
-        {-0.076553773314, 1.176229699812, -0.099675926450},
-        {0.008316148425, -0.006032449791, 0.997716301413},
+        {1.451439316072f, -0.236510746889f, -0.214928569308f},
+        {-0.076553773314f, 1.176229699812f, -0.099675926450f},
+        {0.008316148425f, -0.006032449791f, 0.997716301413f},
     };
     float AP1_2_XYZ_MAT[3][3] = {
-        {0.662454181109, 0.134004206456, 0.156187687005},
-        {0.272228716781, 0.674081765811, 0.053689517408},
-        {-0.005574649490, 0.004060733529, 1.010339100313},
+        {0.662454181109f, 0.134004206456f, 0.156187687005f},
+        {0.272228716781f, 0.674081765811f, 0.053689517408f},
+        {-0.005574649490f, 0.004060733529f, 1.010339100313f},
     };
     // // ACES to D65 adaptation matrix with Bradford CAT
     float D60_2_D65_CAT[3][3] = {
-        {0.989499, -0.006432, 0.016933},
-        {-0.007239, 1.001861, 0.005377},
-        {0.002688, -0.004679, 1.001992},
+        {0.989499f, -0.006432f, 0.016933f},
+        {-0.007239f, 1.001861f, 0.005377f},
+        {0.002688f, -0.004679f, 1.001992f},
     };
 
     // Oces is set so that each unit of 1.0 is one nit.
@@ -355,7 +355,7 @@ __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p
     // Apply desaturation to compensate for luminance difference
     float ODT_SAT_MAT[3][3] = {};
     // AP1 XYZ Y coefficients
-    const float3 AP1_RGB2Y = make_float3(0.272228716781, 0.674081765811, 0.053689517408);
+    const float3 AP1_RGB2Y = make_float3(0.272228716781f, 0.674081765811f, 0.053689517408f);
     calc_sat_adjust_matrix(ODT_SAT_MAT, ODT_SAT_FACTOR, AP1_RGB2Y);
     linearCV = mv_33_3(ODT_SAT_MAT, linearCV);
 
@@ -369,15 +369,15 @@ __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p
 
     // Above three steps combined into a single matrix.
     float AP1_TO_DISPLAY_PRI_MAT[3][3] = {
-        {1.705050992658, -0.621792120657, -0.083258872001},
-        {-0.130256417507, 1.140804736575, -0.010548319068},
-        {-0.024003356805, -0.128968976065, 1.152972332870},
+        {1.705050992658f, -0.621792120657f, -0.083258872001f},
+        {-0.130256417507f, 1.140804736575f, -0.010548319068f},
+        {-0.024003356805f, -0.128968976065f, 1.152972332870f},
     };
     linearCV = mv_33_3(AP1_TO_DISPLAY_PRI_MAT, linearCV);
 
     // Handle out-of-gamut values
     // Clip values < 0 or > 1 (i.e. projecting outside the display primaries)
-    linearCV = clamp_f3(linearCV, 0., 1.);
+    linearCV = clamp_f3(linearCV, 0.f, 1.f);
 
     // Encode linear code values with transfer function
     float3 outputCV;

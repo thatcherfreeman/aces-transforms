@@ -31,9 +31,9 @@ __DEVICE__ inline float dlog_to_linear(float t) {
 // source color space D-Gamut and Output ACES AP0, with CAT02 chromatic adaptation.
 // D-Gamut primaries in pdf in this repo.
 __CONSTANT__ float matrix[3][3] = {
-    {0.691309679422070, 0.214321321172847, 0.094313877486212},
-    {0.066198404984437, 1.011647299751503, -0.077841359214503},
-    {-0.017336827408772, -0.077408461427838, 1.094508313552851},
+    {0.691309679422070f, 0.214321321172847f, 0.094313877486212f},
+    {0.066198404984437f, 1.011647299751503f, -0.077841359214503f},
+    {-0.017336827408772f, -0.077408461427838f, 1.094508313552851f},
 };
 
 __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {

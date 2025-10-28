@@ -18,23 +18,23 @@ __DEVICE__ inline float linear_to_apple_log(float x) {
     const float b = 0.00964052f;
     const float y = 0.08550479f;
     const float d = 0.69336945f;
-    const float Pt = c * _powf(Rt - R0, 2.0);
+    const float Pt = c * _powf(Rt - R0, 2.0f);
 
     if (x >= Rt) {
         out = y * _log2f(x + b) + d;
     } else if (x > R0) {
-        out = c * (_powf(x - R0, 2.0));
+        out = c * (_powf(x - R0, 2.0f));
     } else {
-        out = 0.0;
+        out = 0.0f;
     }
     return out;
 }
 
 // Used inverse of matrix from the IDT.
 __CONSTANT__ float matrix[3][3] = {
-    {1.490868704657009, -0.268712979082956, -0.222155725704626},
-    {-0.079237210602833, 1.179368583111103, -0.100131372460806},
-    {0.002778100767079, -0.030433614631534, 1.027655513912370},
+    {1.490868704657009f, -0.268712979082956f, -0.222155725704626f},
+    {-0.079237210602833f, 1.179368583111103f, -0.100131372460806f},
+    {0.002778100767079f, -0.030433614631534f, 1.027655513912370f},
 };
 
 __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {

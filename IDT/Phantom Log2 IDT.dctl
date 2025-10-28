@@ -37,9 +37,9 @@ __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p
     // Used values calculated from https://www.colour-science.org:8010/apps/rgb_colourspace_transformation_matrix
     // source color space Rec709 and Output ACES AP0, with CAT02 chromatic adaptation.
     float matrix[3][3] = {
-        {0.439575684216680, 0.383912589336509, 0.176511726489679},
-        {0.089600382903921, 0.814714154206652, 0.095685462895180},
-        {0.017415482729199, 0.108734352236674, 0.873850165033623},
+        {0.439575684216680f, 0.383912589336509f, 0.176511726489679f},
+        {0.089600382903921f, 0.814714154206652f, 0.095685462895180f},
+        {0.017415482729199f, 0.108734352236674f, 0.873850165033623f},
     };
     float3 rgb2 = mv_33_3(matrix, rgb);
     return rgb2;

@@ -4,7 +4,7 @@ DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
 
 __DEVICE__ float linear_to_protune(float t) {
     // Protune function taken from https://nick-shaw.github.io/cinematiccolor/common-rgb-color-spaces.html
-    return _logf(t * 112.0 + 1.0) / _logf(113.0);
+    return _logf(t * 112.0f + 1.0f) / _logf(113.0f);
 }
 
 __DEVICE__ float3 mv_33_3(float mat[3][3], float3 v) {
@@ -20,14 +20,14 @@ __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p
     // Used values calculated from http://color.support/colorspacecalculator.html
     // Native color primaries taken from https://nick-shaw.github.io/cinematiccolor/common-rgb-color-spaces.html
     float matrix[3][3] = {
-        {1.846069, -0.615685, -0.230384},
-        {0.084278, 0.908345, 0.007377},
-        {-0.087766, 0.249134, 0.838633},
+        {1.846069f, -0.615685f, -0.230384f},
+        {0.084278f, 0.908345f, 0.007377f},
+        {-0.087766f, 0.249134f, 0.838633f},
     };
     float3 rgb2 = mv_33_3(matrix, rgb);
 
     // Estimated from some gray card exposures.
-    const float gain = 1.46014;
+    const float gain = 1.46014f;
     rgb2 /= gain;
 
     // Convert back to log.

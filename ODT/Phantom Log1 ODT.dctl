@@ -21,7 +21,6 @@ __DEVICE__ float linear_to_phantom_log1(float x) {
     return out;
 }
 
-
 __DEVICE__ float3 mv_33_3(float mat[3][3], float3 v) {
     float3 out = make_float3(mat[0][0] * v.x + mat[0][1] * v.y + mat[0][2] * v.z,
                              mat[1][0] * v.x + mat[1][1] * v.y + mat[1][2] * v.z,
@@ -34,9 +33,9 @@ __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p
 
     // Used inverse of the matrix in the IDT.
     float matrix[3][3] = {
-        {2.5219347298, -1.1370238965, -0.3849108336},
-        {-0.2754794279, 1.3698289786, -0.0943495507},
-        {-0.0159828700, -0.1477892341, 1.1637721042},
+        {2.5219347298f, -1.1370238965f, -0.3849108336f},
+        {-0.2754794279f, 1.3698289786f, -0.0943495507f},
+        {-0.0159828700f, -0.1477892341f, 1.1637721042f},
     };
     float3 rgb2 = mv_33_3(matrix, rgb);
 

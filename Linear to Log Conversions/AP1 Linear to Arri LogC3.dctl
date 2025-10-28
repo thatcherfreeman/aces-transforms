@@ -8,13 +8,13 @@
  */
 
 __DEVICE__ inline float linear_to_logc3(float x) {
-    float cut = 0.010591;
-    float a = 5.555556;
-    float b = 0.052272;
-    float c = 0.247190;
-    float d = 0.385537;
-    float e = 5.367655;
-    float f = 0.092809;
+    float cut = 0.010591f;
+    float a = 5.555556f;
+    float b = 0.052272f;
+    float c = 0.247190f;
+    float d = 0.385537f;
+    float e = 5.367655f;
+    float f = 0.092809f;
 
     if (x > cut) {
         return c * _log10f(a * x + b) + d;
@@ -24,9 +24,9 @@ __DEVICE__ inline float linear_to_logc3(float x) {
 }
 
 __CONSTANT__ float matrix[3][3] = {
-    {1.038964524227836, -0.097990648132676, 0.059026188950432},
-    {-0.044188340964928, 0.858661152455147, 0.185526590637442},
-    {-0.009832544998754, 0.054640323260596, 0.955190893470680},
+    {1.038964524227836f, -0.097990648132676f, 0.059026188950432f},
+    {-0.044188340964928f, 0.858661152455147f, 0.185526590637442f},
+    {-0.009832544998754f, 0.054640323260596f, 0.955190893470680f},
 };
 
 __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {

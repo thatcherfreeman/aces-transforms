@@ -30,9 +30,9 @@ __DEVICE__ inline float flog2c_to_linear(float t) {
 // Used values calculated from https://haraldbrendel.com/colorspacecalculator.html
 // source color space given in the spec sheet primaries and Output ACES AP0, with CAT02 chromatic adaptation.
 __CONSTANT__ float matrix[3][3] = {
-    {0.840895, 0.027528, 0.131577},
-    {0.000920, 1.007390, -0.008310},
-    {-0.000560, -0.000776, 1.001336},
+    {0.840895f, 0.027528f, 0.131577f},
+    {0.000920f, 1.007390f, -0.008310f},
+    {-0.000560f, -0.000776f, 1.001336f},
 };
 
 __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {

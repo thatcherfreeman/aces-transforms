@@ -29,9 +29,9 @@ __DEVICE__ inline float linear_to_flog2c(float x) {
 
 // Used inverse of matrix from the IDT.
 __CONSTANT__ float matrix[3][3] = {
-    {1.189141, -0.032615, -0.156526},
-    {-0.001081, 0.992700, 0.008381},
-    {0.000664, 0.000752, 0.998584},
+    {1.189141f, -0.032615f, -0.156526f},
+    {-0.001081f, 0.992700f, 0.008381f},
+    {0.000664f, 0.000752f, 0.998584f},
 };
 
 __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {

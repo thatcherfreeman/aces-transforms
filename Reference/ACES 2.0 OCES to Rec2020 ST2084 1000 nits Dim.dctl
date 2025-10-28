@@ -7,46 +7,46 @@ DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM : 0)
 #define cuspCornerCount 6
 #define totalCornerCount 8
 #define max_sorted_corners 12
-#define reach_cusp_tolerance 1e-3
-#define display_cusp_tolerance 1e-7
+#define reach_cusp_tolerance 1e-3f
+#define display_cusp_tolerance 1e-7f
 
-__CONSTANT__ float hue_limit = 360.;
+__CONSTANT__ float hue_limit = 360.f;
 
-__CONSTANT__ float ref_luminance = 100.0;
-__CONSTANT__ float L_A = 100.0;
-__CONSTANT__ float Y_b = 20.0;
-__CONSTANT__ float surround[3] = {0.9, 0.59, 0.9}; // Dim surround
-__CONSTANT__ float J_scale = 100.0;
-__CONSTANT__ float cam_nl_Y_reference = 100.0;
-__CONSTANT__ float cam_nl_offset = 0.2713 * cam_nl_Y_reference;
-__CONSTANT__ float cam_nl_scale = 4.0 * cam_nl_Y_reference;
+__CONSTANT__ float ref_luminance = 100.0f;
+__CONSTANT__ float L_A = 100.0f;
+__CONSTANT__ float Y_b = 20.0f;
+__CONSTANT__ float surround[3] = {0.9f, 0.59f, 0.9f}; // Dim surround
+__CONSTANT__ float J_scale = 100.0f;
+__CONSTANT__ float cam_nl_Y_reference = 100.0f;
+__CONSTANT__ float cam_nl_offset = 0.2713f * cam_nl_Y_reference;
+__CONSTANT__ float cam_nl_scale = 4.0f * cam_nl_Y_reference;
 
-__CONSTANT__ float chroma_compress = 2.4;
-__CONSTANT__ float chroma_compress_fact = 3.3;
-__CONSTANT__ float chroma_expand = 1.3;
-__CONSTANT__ float chroma_expand_fact = 0.69;
-__CONSTANT__ float chroma_expand_thr = 0.5;
+__CONSTANT__ float chroma_compress = 2.4f;
+__CONSTANT__ float chroma_compress_fact = 3.3f;
+__CONSTANT__ float chroma_expand = 1.3f;
+__CONSTANT__ float chroma_expand_fact = 0.69f;
+__CONSTANT__ float chroma_expand_thr = 0.5f;
 
-__CONSTANT__ float gamma_minimum = 0.0;
-__CONSTANT__ float gamma_maximum = 5.0;
-__CONSTANT__ float gamma_search_step = 0.4;
-__CONSTANT__ float gamma_accuracy = 1e-5;
+__CONSTANT__ float gamma_minimum = 0.0f;
+__CONSTANT__ float gamma_maximum = 5.0f;
+__CONSTANT__ float gamma_search_step = 0.4f;
+__CONSTANT__ float gamma_accuracy = 1e-5f;
 
 // Gamut compression
-__CONSTANT__ float smooth_cusps = 0.12;
-__CONSTANT__ float smooth_m = 0.27;
-__CONSTANT__ float cusp_mid_blend = 1.3;
+__CONSTANT__ float smooth_cusps = 0.12f;
+__CONSTANT__ float smooth_m = 0.27f;
+__CONSTANT__ float cusp_mid_blend = 1.3f;
 
-__CONSTANT__ float focus_gain_blend = 0.3;
-__CONSTANT__ float focus_distance = 1.35;
-__CONSTANT__ float focus_distance_scaling = 1.75;
+__CONSTANT__ float focus_gain_blend = 0.3f;
+__CONSTANT__ float focus_distance = 1.35f;
+__CONSTANT__ float focus_distance_scaling = 1.75f;
 
-__CONSTANT__ float compression_threshold = 0.75;
+__CONSTANT__ float compression_threshold = 0.75f;
 
 __CONSTANT__ int test_count = 5;
-__CONSTANT__ float testPositions[test_count] = {0.01, 0.1, 0.5, 0.8, 0.99};
+__CONSTANT__ float testPositions[test_count] = {0.01f, 0.1f, 0.5f, 0.8f, 0.99f};
 
-#define PI (3.14159265358979323846)
+#define PI (3.14159265358979323846f)
 
 typedef struct {
         float2 red;
@@ -125,26 +125,26 @@ typedef struct {
 
 // Academy Primaries 0
 __CONSTANT__ Chromaticities AP0 = {
-    {0.73470, 0.26530},
-    {0.00000, 1.00000},
-    {0.00010, -0.07700},
-    {0.32168, 0.33767},
+    {0.73470f, 0.26530f},
+    {0.00000f, 1.00000f},
+    {0.00010f, -0.07700f},
+    {0.32168f, 0.33767f},
 };
 
 // Academy Primaries 1
 __CONSTANT__ Chromaticities AP1 = {
-    {0.713, 0.293},
-    {0.165, 0.830},
-    {0.128, 0.044},
-    {0.32168, 0.33767},
+    {0.713f, 0.293f},
+    {0.165f, 0.830f},
+    {0.128f, 0.044f},
+    {0.32168f, 0.33767f},
 };
 
 // "Reach" Primaries - equal to ACES "AP1" primaries
 __CONSTANT__ Chromaticities REACH_PRI = {
-    {0.713, 0.293},
-    {0.165, 0.830},
-    {0.128, 0.044},
-    {0.32168, 0.33767},
+    {0.713f, 0.293f},
+    {0.165f, 0.830f},
+    {0.128f, 0.044f},
+    {0.32168f, 0.33767f},
 };
 
 __DEVICE__ void clamp_f3(float out[3], float in[3], float clampMin, float clampMax) {
@@ -214,13 +214,13 @@ __DEVICE__ inline float pow2f(float base) {
 }
 
 __DEVICE__ float powi(float x, int exp) {
-    float out = 1.0;
+    float out = 1.0f;
     int abs_exp = exp < 0 ? exp * -1 : exp;
     for (int i = 0; i < abs_exp; ++i) {
         out *= x;
     }
     if (exp < 0) {
-        out = 1.0 / out;
+        out = 1.0f / out;
     }
     return out;
 }
@@ -250,7 +250,7 @@ __DEVICE__ void mat_fill(float dest[3][3], float fill) {
 }
 
 __DEVICE__ void diagonal_matrix(float dest[3][3], float3 diagonal) {
-    mat_fill(dest, 0.0);
+    mat_fill(dest, 0.0f);
     dest[0][0] = diagonal.x;
     dest[1][1] = diagonal.y;
     dest[2][2] = diagonal.z;
@@ -259,7 +259,7 @@ __DEVICE__ void diagonal_matrix(float dest[3][3], float3 diagonal) {
 __DEVICE__ void RGBtoXYZ_f33(float M[3][3], Chromaticities C, float Y) {
     // X and Z values of RGB value (1, 1, 1), or "white"
     float X = C.white[0] * Y / C.white[1];
-    float Z = (1. - C.white[0] - C.white[1]) * Y / C.white[1];
+    float Z = (1.f - C.white[0] - C.white[1]) * Y / C.white[1];
 
     // Scale factors for matrix rows
     float d = C.red[0] * (C.blue[1] - C.green[1]) + C.blue[0] * (C.green[1] - C.red[1]) + C.green[0] * (C.red[1] - C.blue[1]);
@@ -279,13 +279,13 @@ __DEVICE__ void RGBtoXYZ_f33(float M[3][3], Chromaticities C, float Y) {
     // Assemble the matrix
     M[0][0] = Sr * C.red[0];
     M[0][1] = Sr * C.red[1];
-    M[0][2] = Sr * (1. - C.red[0] - C.red[1]);
+    M[0][2] = Sr * (1.f - C.red[0] - C.red[1]);
     M[1][0] = Sg * C.green[0];
     M[1][1] = Sg * C.green[1];
-    M[1][2] = Sg * (1. - C.green[0] - C.green[1]);
+    M[1][2] = Sg * (1.f - C.green[0] - C.green[1]);
     M[2][0] = Sb * C.blue[0];
     M[2][1] = Sb * C.blue[1];
-    M[2][2] = Sb * (1. - C.blue[0] - C.blue[1]);
+    M[2][2] = Sb * (1.f - C.blue[0] - C.blue[1]);
 }
 
 __DEVICE__ void XYZtoRGB_f33(float dst[3][3], Chromaticities C, float Y) {
@@ -295,7 +295,7 @@ __DEVICE__ void XYZtoRGB_f33(float dst[3][3], Chromaticities C, float Y) {
 }
 
 __DEVICE__ float _post_adaptation_cone_response_compression_fwd(float Rc) {
-    const float F_L_Y = powf(Rc, 0.42);
+    const float F_L_Y = powf(Rc, 0.42f);
     const float Ra = (F_L_Y) / (cam_nl_offset + F_L_Y);
     return Ra;
 }
@@ -312,23 +312,23 @@ __DEVICE__ float3 f3_to_float3(float x[3]) {
 
 __DEVICE__ JMhParams init_JMhParams(Chromaticities prims) {
     const Chromaticities CAM16_PRI = {
-        {0.8336, 0.1735},
-        {2.3854, -1.4659},
-        {0.087, -0.125},
-        {0.333, 0.333},
+        {0.8336f, 0.1735f},
+        {2.3854f, -1.4659f},
+        {0.087f, -0.125f},
+        {0.333f, 0.333f},
     };
 
     float MATRIX_16[3][3];
-    XYZtoRGB_f33(MATRIX_16, CAM16_PRI, 1.0);
+    XYZtoRGB_f33(MATRIX_16, CAM16_PRI, 1.0f);
 
     float base_cone_response_to_Aab[3][3] = {
-        {2., 1., 1. / 9.},
-        {1., -12. / 11., 1. / 9.},
-        {1. / 20., 1. / 11., -2. / 9.},
+        {2.f, 1.f, 1.f / 9.f},
+        {1.f, -12.f / 11.f, 1.f / 9.f},
+        {1.f / 20.f, 1.f / 11.f, -2.f / 9.f},
     };
 
     float RGB_TO_XYZ[3][3];
-    RGBtoXYZ_f33(RGB_TO_XYZ, prims, 1.0);
+    RGBtoXYZ_f33(RGB_TO_XYZ, prims, 1.0f);
     float XYZ_w[3];
     float ref_luminance_vec[3] = {ref_luminance, ref_luminance, ref_luminance};
     vm_3_33(XYZ_w, ref_luminance_vec, RGB_TO_XYZ);
@@ -340,12 +340,12 @@ __DEVICE__ JMhParams init_JMhParams(Chromaticities prims) {
     vm_3_33(RGB_w, XYZ_w, MATRIX_16);
 
     // Viewing condition dependent parameters
-    const float k = 1. / (5. * L_A + 1.);
+    const float k = 1.f / (5.f * L_A + 1.f);
     const float k4 = k * k * k * k;
-    const float F_L = 0.2 * k4 * (5. * L_A) + 0.1 * pow2f((1. - k4)) * powf(5. * L_A, 1. / 3.);
+    const float F_L = 0.2f * k4 * (5.f * L_A) + 0.1f * pow2f((1.f - k4)) * powf(5.f * L_A, 1.f / 3.f);
 
     const float F_L_n = F_L / ref_luminance;
-    const float model_gamma = surround[1] * (1.48 + _sqrtf(Y_b / ref_luminance));
+    const float model_gamma = surround[1] * (1.48f + _sqrtf(Y_b / ref_luminance));
     const float cz = model_gamma;
 
     float D_RGB[3] = {F_L_n * Y_w / RGB_w[0], F_L_n * Y_w / RGB_w[1], F_L_n * Y_w / RGB_w[2]};
@@ -377,9 +377,9 @@ __DEVICE__ JMhParams init_JMhParams(Chromaticities prims) {
     mm_33_33(MATRIX_RGB_to_CAM16_c, MATRIX_RGB_to_CAM16, d_rgb_mat);
 
     float MATRIX_cone_response_to_Aab[3][3] = {
-        {cone_response_to_Aab[0][0] / A_w, cone_response_to_Aab[0][1] * 43. * surround[2], cone_response_to_Aab[0][2] * 43. * surround[2]},
-        {cone_response_to_Aab[1][0] / A_w, cone_response_to_Aab[1][1] * 43. * surround[2], cone_response_to_Aab[1][2] * 43. * surround[2]},
-        {cone_response_to_Aab[2][0] / A_w, cone_response_to_Aab[2][1] * 43. * surround[2], cone_response_to_Aab[2][2] * 43. * surround[2]}};
+        {cone_response_to_Aab[0][0] / A_w, cone_response_to_Aab[0][1] * 43.f * surround[2], cone_response_to_Aab[0][2] * 43.f * surround[2]},
+        {cone_response_to_Aab[1][0] / A_w, cone_response_to_Aab[1][1] * 43.f * surround[2], cone_response_to_Aab[1][2] * 43.f * surround[2]},
+        {cone_response_to_Aab[2][0] / A_w, cone_response_to_Aab[2][1] * 43.f * surround[2], cone_response_to_Aab[2][2] * 43.f * surround[2]}};
 
     JMhParams p;
     copy_mat_33(p.MATRIX_RGB_to_CAM16_c, MATRIX_RGB_to_CAM16_c);
@@ -388,9 +388,9 @@ __DEVICE__ JMhParams init_JMhParams(Chromaticities prims) {
     inverse_33(p.MATRIX_Aab_to_cone_response, MATRIX_cone_response_to_Aab);
     p.F_L_n = F_L_n;
     p.cz = cz;
-    p.inv_cz = 1. / cz;
+    p.inv_cz = 1.f / cz;
     p.A_w_J = A_w_J;
-    p.inv_A_w_J = 1. / A_w_J;
+    p.inv_A_w_J = 1.f / A_w_J;
 
     return p;
 }
@@ -401,25 +401,25 @@ __DEVICE__ TSParams init_TSParams(float peakLuminance) {
     // Preset constants that set the desired behavior for the curve
     const float n = peakLuminance;
 
-    const float n_r = 100.0;      // normalized white in nits (what 1.0 should be)
-    const float g = 1.15;         // surround / contrast
-    const float c = 0.18;         // anchor for 18% grey
-    const float c_d = 10.013;     // output luminance of 18% grey (in nits)
-    const float w_g = 0.14;       // change in grey between different peak luminance
-    const float t_1 = 0.04;       // shadow toe or flare/glare compensation
+    const float n_r = 100.0f;      // normalized white in nits (what 1.0f should be)
+    const float g = 1.15f;         // surround / contrast
+    const float c = 0.18f;         // anchor for 18% grey
+    const float c_d = 10.013f;     // output luminance of 18% grey (in nits)
+    const float w_g = 0.14f;       // change in grey between different peak luminance
+    const float t_1 = 0.04f;       // shadow toe or flare/glare compensation
     const float r_hit_min = 128.; // scene-referred value "hitting the roof" for SDR (e.g. when n = 100 nits)
     const float r_hit_max = 896.; // scene-referred value "hitting the roof" for when n = 10000 nits
 
     // Calculate output constants
-    const float r_hit = r_hit_min + (r_hit_max - r_hit_min) * (_logf(n / n_r) / _logf(10000. / 100.));
+    const float r_hit = r_hit_min + (r_hit_max - r_hit_min) * (_logf(n / n_r) / _logf(10000.f / 100.f));
     const float m_0 = (n / n_r);
-    const float m_1 = 0.5 * (m_0 + _sqrtf(m_0 * (m_0 + 4. * t_1)));
+    const float m_1 = 0.5f * (m_0 + _sqrtf(m_0 * (m_0 + 4.f * t_1)));
     const float u = powf((r_hit / m_1) / ((r_hit / m_1) + 1), g);
     const float m = m_1 / u;
-    const float w_i = _logf(n / 100.) / _logf(2.);
-    const float c_t = c_d / n_r * (1. + w_i * w_g);
-    const float g_ip = 0.5 * (c_t + _sqrtf(c_t * (c_t + 4. * t_1)));
-    const float g_ipp2 = -(m_1 * powf((g_ip / m), (1. / g))) / (powf(g_ip / m, 1. / g) - 1.);
+    const float w_i = _logf(n / 100.f) / _logf(2.f);
+    const float c_t = c_d / n_r * (1.f + w_i * w_g);
+    const float g_ip = 0.5f * (c_t + _sqrtf(c_t * (c_t + 4.f * t_1)));
+    const float g_ipp2 = -(m_1 * powf((g_ip / m), (1.f / g))) / (powf(g_ip / m, 1.f / g) - 1.f);
     const float w_2 = c / g_ipp2;
     const float s_2 = w_2 * m_1;
     const float u_2 = powf((r_hit / m_1) / ((r_hit / m_1) + w_2), g);
@@ -434,7 +434,7 @@ __DEVICE__ TSParams init_TSParams(float peakLuminance) {
     p.s_2 = s_2;
     p.u_2 = u_2;
     p.m_2 = m_2;
-    p.forward_limit = 8.0 * r_hit;
+    p.forward_limit = 8.0f * r_hit;
     p.inverse_limit = n / (u_2 * n_r);
     p.log_peak = _log10f(n / n_r);
 
@@ -459,23 +459,23 @@ __DEVICE__ float base_hue_for_position(int i_lo, int table_size) {
 }
 
 __DEVICE__ float degrees_to_radians(float degrees) {
-    return degrees / 180.0 * PI;
+    return degrees / 180.0f * PI;
 }
 
 __DEVICE__ float radians_to_degrees(float radians) {
-    return radians * 180.0 / PI;
+    return radians * 180.0f / PI;
 }
 
 __DEVICE__ float wrap_to_360(float hue) {
-    float y = _fmod(hue, 360.);
-    if (y < 0.) {
-        y = y + 360.;
+    float y = _fmod(hue, 360.f);
+    if (y < 0.f) {
+        y = y + 360.f;
     }
     return y;
 }
 
 __DEVICE__ float J_to_Achromatic_n(float J, float inv_cz) {
-    return powf(J * (1. / J_scale), inv_cz);
+    return powf(J * (1.f / J_scale), inv_cz);
 }
 
 __DEVICE__ void JMh_to_Aab(float Aab[3], float JMh[3], JMhParams p) {
@@ -495,9 +495,9 @@ __DEVICE__ void JMh_to_Aab(float Aab[3], float JMh[3], JMhParams p) {
 }
 
 __DEVICE__ float _post_adaptation_cone_response_compression_inv(float Ra) {
-    const float Ra_lim = _fminf(Ra, 0.99);
-    const float F_L_Y = (cam_nl_offset * Ra_lim) / (1. - Ra_lim);
-    const float Rc = powf(F_L_Y, 1. / 0.42);
+    const float Ra_lim = _fminf(Ra, 0.99f);
+    const float F_L_Y = (cam_nl_offset * Ra_lim) / (1.f - Ra_lim);
+    const float Rc = powf(F_L_Y, 1.f / 0.42f);
     return Rc;
 }
 
@@ -530,10 +530,10 @@ __DEVICE__ void RGB_to_Aab(float Aab[3], float RGB[3], JMhParams p) {
 }
 
 __DEVICE__ void Aab_to_JMh(float JMh[3], float Aab[3], JMhParams p) {
-    JMh[0] = 0.;
-    JMh[1] = 0.;
-    JMh[2] = 0.;
-    if (Aab[0] <= 0.) {
+    JMh[0] = 0.f;
+    JMh[1] = 0.f;
+    JMh[2] = 0.f;
+    if (Aab[0] <= 0.f) {
         return;
     }
     float J = Achromatic_n_to_J(Aab[0], p.cz);
@@ -561,7 +561,7 @@ __DEVICE__ void RGB_to_JMh(float JMh[3], float RGB[3], JMhParams p) {
 
 // Table building functions
 __DEVICE__ bool any_below_zero(float newLimitRGB[3]) {
-    return (newLimitRGB[0] < 0. || newLimitRGB[1] < 0. || newLimitRGB[2] < 0.);
+    return (newLimitRGB[0] < 0.f || newLimitRGB[1] < 0.f || newLimitRGB[2] < 0.f);
 }
 
 // Finds reach gamut M value at limitJmax
@@ -571,9 +571,9 @@ __DEVICE__ void make_reach_m_table(float dst[totalTableSize], JMhParams params, 
         // float i_float = i;
         float hue = base_hue_for_position(i, tableSize);
 
-        const float search_range = 50.;
-        const float search_maximum = 1300.;
-        float low = 0.;
+        const float search_range = 50.f;
+        const float search_maximum = 1300.f;
+        float low = 0.f;
         float high = low + search_range;
         bool outside = false;
 
@@ -588,8 +588,8 @@ __DEVICE__ void make_reach_m_table(float dst[totalTableSize], JMhParams params, 
             }
         }
 
-        while (high - low > 1e-2) {
-            float sampleM = (high + low) / 2.;
+        while (high - low > 1e-2f) {
+            float sampleM = (high + low) / 2.f;
             float searchJMh[3] = {limitJmax, sampleM, hue};
             float newLimitRGB[3];
             JMh_to_RGB(newLimitRGB, searchJMh, params);
@@ -646,11 +646,11 @@ __DEVICE__ void find_reach_corners_table(float JMh_corners[totalCornerCount][3],
         float rgb_vector[3];
         generate_unit_cube_cusp_corners(rgb_vector, i);
 
-        float lower = 0.0;
+        float lower = 0.0f;
         float upper = p.ts.forward_limit;
 
         while ((upper - lower) > reach_cusp_tolerance) {
-            float test = (lower + upper) / 2.;
+            float test = (lower + upper) / 2.f;
             float test_corner[3];
             fv_f_f3(test_corner, test, rgb_vector);
             float Aab[3];
@@ -766,7 +766,7 @@ __DEVICE__ void build_hue_table(float hue_table[totalTableSize], float sorted_hu
     int samples_count[2 * cuspCornerCount + 2];
     int last_idx;
     int min_index;
-    if (sorted_hues[0] == 0.0) {
+    if (sorted_hues[0] == 0.0f) {
         min_index = 0;
     } else {
         min_index = 1;
@@ -794,7 +794,7 @@ __DEVICE__ void build_hue_table(float hue_table[totalTableSize], float sorted_hu
     int total_samples = 0;
     // Special cases for ends
     int i = 0;
-    build_hue_sample_interval(hue_table, samples_count[i], 0.0, sorted_hues[i], hue_table, total_samples + 1);
+    build_hue_sample_interval(hue_table, samples_count[i], 0.0f, sorted_hues[i], hue_table, total_samples + 1);
     total_samples = total_samples + samples_count[i];
 
     for (i = i + 1; i != max_sorted_corners; i = i + 1) {
@@ -809,7 +809,7 @@ __DEVICE__ void build_hue_table(float hue_table[totalTableSize], float sorted_hu
 }
 
 __DEVICE__ float midpoint(float low, float high) {
-    return (low + high) / 2.;
+    return (low + high) / 2.f;
 }
 
 __DEVICE__ float lerp(float a, float b, float t) {
@@ -858,10 +858,10 @@ __DEVICE__ void find_display_cusp_for_hue(float return_JM[2],
     float sample[3];
 
     float sample_t;
-    float lower_t = 0.0;
+    float lower_t = 0.0f;
     if (upper_corner == previous[0])
         lower_t = previous[1];
-    float upper_t = 1.0;
+    float upper_t = 1.0f;
 
     float JMh[3];
 
@@ -899,14 +899,14 @@ __DEVICE__ void build_cusp_table(float output_table[totalTableSize][3],
                                  float RGB_corners[totalCornerCount][3],
                                  float JMh_corners[totalCornerCount][3],
                                  JMhParams params) {
-    float previous[2] = {0.0, 0.0};
+    float previous[2] = {0.0f, 0.0f};
 
     for (int i = baseIndex; i != totalTableSize; i = i + 1) {
         float hue = hue_table[i];
         float JM[2];
         find_display_cusp_for_hue(JM, hue, RGB_corners, JMh_corners, params, previous);
         output_table[i][0] = JM[0];
-        output_table[i][1] = JM[1] * (1. + smooth_m * smooth_cusps);
+        output_table[i][1] = JM[1] * (1.f + smooth_m * smooth_cusps);
         output_table[i][2] = hue;
     }
 
@@ -955,8 +955,8 @@ __DEVICE__ float get_focus_gain(float J, float analytical_threshold, float limit
 
     if (J > analytical_threshold) {
         // Approximate inverse required above threshold due to the introduction of J in the calculation
-        float gain_adjustment = _log10f((limit_J_max - analytical_threshold) / _fmaxf(0.0001, limit_J_max - J));
-        gain_adjustment = gain_adjustment * gain_adjustment + 1.;
+        float gain_adjustment = _log10f((limit_J_max - analytical_threshold) / _fmaxf(0.0001f, limit_J_max - J));
+        gain_adjustment = gain_adjustment * gain_adjustment + 1.f;
         gain = gain * gain_adjustment;
     }
 
@@ -968,17 +968,17 @@ __DEVICE__ float solve_J_intersect(float J, float M, float focusJ, float maxJ, f
     const float a = M_scaled / focusJ;
 
     if (J < focusJ) {
-        const float b = 1. - M_scaled;
+        const float b = 1.f - M_scaled;
         const float c = -J;
-        const float det = b * b - 4. * a * c;
+        const float det = b * b - 4.f * a * c;
         const float root = _sqrtf(det);
-        return -2. * c / (b + root);
+        return -2.f * c / (b + root);
     } else {
-        const float b = -(1. + M_scaled + maxJ * a);
+        const float b = -(1.f + M_scaled + maxJ * a);
         const float c = maxJ * M_scaled + J;
-        const float det = b * b - 4. * a * c;
+        const float det = b * b - 4.f * a * c;
         const float root = _sqrtf(det);
-        return -2. * c / (b - root);
+        return -2.f * c / (b - root);
     }
 }
 
@@ -1044,8 +1044,8 @@ __DEVICE__ float estimate_line_and_boundary_intersection_M(
 // Smooth minimum about the scaled reference, based upon a cubic polynomial
 __DEVICE__ float smin_scaled(float a, float b, float scale_reference) {
     const float s_scaled = smooth_cusps * scale_reference;
-    const float h = _fmaxf(s_scaled - _fabs(a - b), 0.0) / s_scaled;
-    return _fminf(a, b) - h * h * h * s_scaled * (1. / 6.);
+    const float h = _fmaxf(s_scaled - _fabs(a - b), 0.0f) / s_scaled;
+    return _fminf(a, b) - h * h * h * s_scaled * (1.f / 6.f);
 }
 
 __DEVICE__ float find_gamut_boundary_intersection(float JM_cusp[2],
@@ -1146,7 +1146,7 @@ __DEVICE__ void make_upper_hull_gamma_table(float upper_hull_gamma[totalTableSiz
                                                  J_intersect_source,
                                                  slopes,
                                                  J_intersect_cusp,
-                                                 1. / high,
+                                                 1.f / high,
                                                  p.peakLuminance,
                                                  p.limit_J_max,
                                                  p.lower_hull_gamma_inv,
@@ -1159,7 +1159,7 @@ __DEVICE__ void make_upper_hull_gamma_table(float upper_hull_gamma[totalTableSiz
             }
         }
 
-        float testGamma = -1.0;
+        float testGamma = -1.0f;
         while ((high - low) > gamma_accuracy) {
             testGamma = midpoint(high, low);
             bool gammaFound = evaluate_gamma_fit(JMcusp,
@@ -1167,7 +1167,7 @@ __DEVICE__ void make_upper_hull_gamma_table(float upper_hull_gamma[totalTableSiz
                                                  J_intersect_source,
                                                  slopes,
                                                  J_intersect_cusp,
-                                                 1. / testGamma,
+                                                 1.f / testGamma,
                                                  p.peakLuminance,
                                                  p.limit_J_max,
                                                  p.lower_hull_gamma_inv,
@@ -1179,7 +1179,7 @@ __DEVICE__ void make_upper_hull_gamma_table(float upper_hull_gamma[totalTableSiz
             }
         }
 
-        upper_hull_gamma[i] = 1. / high;
+        upper_hull_gamma[i] = 1.f / high;
     }
 
     // Copy last populated entry to first empty spot
@@ -1231,21 +1231,21 @@ __DEVICE__ ODTParams init_ODTParams(float peakLuminance, Chromaticities limiting
 
     // Shared compression paramters
     p.limit_J_max = Y_to_J(peakLuminance, p.input_params);
-    const float model_gamma = surround[1] * (1.48 + _sqrtf(Y_b / ref_luminance));
-    p.model_gamma_inv = 1. / model_gamma;
+    const float model_gamma = surround[1] * (1.48f + _sqrtf(Y_b / ref_luminance));
+    p.model_gamma_inv = 1.f / model_gamma;
     make_reach_m_table(p.TABLE_reach_M, p.reach_params, p.limit_J_max);
 
     // Chroma compression parameters
-    p.sat = _fmaxf(0.2, chroma_expand - (chroma_expand * chroma_expand_fact) * p.ts.log_peak);
+    p.sat = _fmaxf(0.2f, chroma_expand - (chroma_expand * chroma_expand_fact) * p.ts.log_peak);
     p.sat_thr = chroma_expand_thr / peakLuminance;
     p.compr = chroma_compress + (chroma_compress * chroma_compress_fact) * p.ts.log_peak;
-    p.chroma_compress_scale = powf(0.03379 * peakLuminance, 0.30596) - 0.45135;
+    p.chroma_compress_scale = powf(0.03379f * peakLuminance, 0.30596f) - 0.45135f;
 
     // Gamut compression parameters
     p.mid_J = Y_to_J(p.ts.c_t * ref_luminance, p.input_params);
     p.focus_dist = focus_distance + focus_distance * focus_distance_scaling * p.ts.log_peak;
-    const float lower_hull_gamma = 1.14 + 0.07 * p.ts.log_peak;
-    p.lower_hull_gamma_inv = 1. / lower_hull_gamma;
+    const float lower_hull_gamma = 1.14f + 0.07f * p.ts.log_peak;
+    p.lower_hull_gamma_inv = 1.f / lower_hull_gamma;
     make_uniform_hue_gamut_table(p.TABLE_gamut_cusps, p.reach_params, p.limit_params, p);
     for (int i = 0; i != totalTableSize; i = i + 1) {
         p.TABLE_hues[i] = p.TABLE_gamut_cusps[i][2];
@@ -1259,14 +1259,14 @@ __DEVICE__ ODTParams init_ODTParams(float peakLuminance, Chromaticities limiting
 __DEVICE__ void clamp_AP0_to_AP1(float AP0_clamped[3], float aces[3], float clamp_lower_limit, float clamp_upper_limit) {
 
     float AP0_XYZ_TO_RGB[3][3];
-    XYZtoRGB_f33(AP0_XYZ_TO_RGB, AP0, 1.0);
+    XYZtoRGB_f33(AP0_XYZ_TO_RGB, AP0, 1.0f);
     float AP0_RGB_TO_XYZ[3][3];
-    RGBtoXYZ_f33(AP0_RGB_TO_XYZ, AP0, 1.0);
+    RGBtoXYZ_f33(AP0_RGB_TO_XYZ, AP0, 1.0f);
 
     float AP1_XYZ_TO_RGB[3][3];
-    XYZtoRGB_f33(AP1_XYZ_TO_RGB, AP1, 1.0);
+    XYZtoRGB_f33(AP1_XYZ_TO_RGB, AP1, 1.0f);
     float AP1_RGB_TO_XYZ[3][3];
-    RGBtoXYZ_f33(AP1_RGB_TO_XYZ, AP1, 1.0);
+    RGBtoXYZ_f33(AP1_RGB_TO_XYZ, AP1, 1.0f);
 
     float AP0_TO_AP1[3][3];
     mm_33_33(AP0_TO_AP1, AP0_RGB_TO_XYZ, AP1_XYZ_TO_RGB);
@@ -1299,8 +1299,8 @@ __DEVICE__ float tonescale_fwd(float x,        // scene-referred input (i.e. lin
                                TSParams params // struct of type TSParams
 ) {
     // forward MM tone scale
-    float f = params.m_2 * powf(_fmaxf(0.0, x) / (x + params.s_2), params.g);
-    float h = _fmaxf(0., f * f / (f + params.t_1)); // forward flare
+    float f = params.m_2 * powf(_fmaxf(0.0f, x) / (x + params.s_2), params.g);
+    float h = _fmaxf(0.f, f * f / (f + params.t_1)); // forward flare
 
     return h * params.n_r; // output is luminance in cd/m^2
 }
@@ -1311,11 +1311,11 @@ __DEVICE__ float chroma_compress_norm(float h, float chroma_compress_scale) {
     float a = _cosf(hr);
     float b = _sinf(hr);
     float cos_hr2 = a * a - b * b;
-    float sin_hr2 = 2.0 * a * b;
-    float cos_hr3 = 4.0 * a * a * a - 3.0 * a;
-    float sin_hr3 = 3.0 * b - 4.0 * b * b * b;
+    float sin_hr2 = 2.0f * a * b;
+    float cos_hr3 = 4.0f * a * a * a - 3.0f * a;
+    float sin_hr3 = 3.0f * b - 4.0f * b * b * b;
 
-    float M = 11.34072 * a + 16.46899 * cos_hr2 + 7.88380 * cos_hr3 + 14.66441 * b + -6.37224 * sin_hr2 + 9.19364 * sin_hr3 + 77.12896;
+    float M = 11.34072f * a + 16.46899f * cos_hr2 + 7.88380f * cos_hr3 + 14.66441f * b + -6.37224f * sin_hr2 + 9.19364f * sin_hr3 + 77.12896f;
 
     return M * chroma_compress_scale;
 }
@@ -1336,7 +1336,7 @@ __DEVICE__ float toe(float x, float limit, float k1_in, float k2_in, bool invert
     if (x > limit)
         return x;
 
-    float k2 = _fmaxf(k2_in, 0.001);
+    float k2 = _fmaxf(k2_in, 0.001f);
     float k1 = _sqrtf(k1_in * k1_in + k2 * k2);
     float k3 = (limit + k1) / (limit + k2);
 
@@ -1345,7 +1345,7 @@ __DEVICE__ float toe(float x, float limit, float k1_in, float k2_in, bool invert
     } else {
         const float minus_b = k3 * x - k1;
         const float minus_c = k2 * k3 * x;
-        return 0.5 * (minus_b + _sqrtf(minus_b * minus_b + 4. * minus_c));
+        return 0.5f * (minus_b + _sqrtf(minus_b * minus_b + 4.f * minus_c));
     }
 }
 
@@ -1356,13 +1356,13 @@ __DEVICE__ void chroma_compress_fwd(float out[3], float JMh[3], float tonemapped
 
     float M_compr = M;
 
-    if (M != 0.0) {
+    if (M != 0.0f) {
         const float nJ = tonemapped_J / p.limit_J_max;
-        const float snJ = _fmaxf(0., 1. - nJ);
+        const float snJ = _fmaxf(0.f, 1.f - nJ);
         float Mnorm = chroma_compress_norm(h, p.chroma_compress_scale);
         float limit = powf(nJ, p.model_gamma_inv) * reach_M_from_table(h, p.TABLE_reach_M) / Mnorm;
 
-        float toe_limit = limit - 0.001;
+        float toe_limit = limit - 0.001f;
         float toe_snJ_sat = snJ * p.sat;
         float toe_sqrt_nJ_sat_thr = _sqrtf(nJ * nJ + p.sat_thr);
         float toe_nJ_compr = nJ * p.compr;
@@ -1482,13 +1482,13 @@ __DEVICE__ HueDependentGamutParams init_HueDependentGamutParams(float hue, ODTPa
 
 __DEVICE__ float reinhard_remap(float scale, float nd, bool invert) {
     if (invert) {
-        if (nd >= 1.0) {
+        if (nd >= 1.0f) {
             return scale;
         } else {
-            return scale * -(nd / (nd - 1.));
+            return scale * -(nd / (nd - 1.f));
         }
     }
-    return scale * nd / (1. + nd);
+    return scale * nd / (1.f + nd);
 }
 
 __DEVICE__ float remap_M(float M, float gamut_boundary_M, float reach_boundary_M, bool invert) {
@@ -1496,7 +1496,7 @@ __DEVICE__ float remap_M(float M, float gamut_boundary_M, float reach_boundary_M
     const float proportion = _fmaxf(boundary_ratio, compression_threshold);
     const float threshold = proportion * gamut_boundary_M;
 
-    if (M <= threshold || proportion >= 1.)
+    if (M <= threshold || proportion >= 1.f)
         return M;
 
     // Translate to place threshold at zero
@@ -1504,7 +1504,7 @@ __DEVICE__ float remap_M(float M, float gamut_boundary_M, float reach_boundary_M
     const float gamut_offset = gamut_boundary_M - threshold;
     const float reach_offset = reach_boundary_M - threshold;
 
-    const float scale = reach_offset / ((reach_offset / gamut_offset) - 1.);
+    const float scale = reach_offset / ((reach_offset / gamut_offset) - 1.f);
     const float nd = m_offset / scale;
 
     // Shift result back to absolute
@@ -1525,8 +1525,8 @@ __DEVICE__ void compress_gamut(float JMhcompressed[3], float JMh[3], float Jx, O
     const float gamut_boundary_M = find_gamut_boundary_intersection(
         hdp.JMcusp, p.limit_J_max, hdp.gamma_top_inv, hdp.gamma_bottom_inv, J_intersect_source, gamut_slope, J_intersect_cusp);
 
-    if (gamut_boundary_M <= 0.) {
-        float returnJMh[3] = {J, 0., h};
+    if (gamut_boundary_M <= 0.f) {
+        float returnJMh[3] = {J, 0.f, h};
         copy_f3(JMhcompressed, returnJMh);
         return;
     }
@@ -1548,14 +1548,14 @@ __DEVICE__ void gamut_compress_fwd(float out[3], float JMh[3], ODTParams p) {
     const float M = JMh[1];
     const float h = JMh[2];
 
-    if (J <= 0.0) {
-        float JMh[3] = {0., 0., h};
+    if (J <= 0.0f) {
+        float JMh[3] = {0.f, 0.f, h};
         copy_f3(out, JMh);
         return;
     }
 
-    if (M < 0. || J > p.limit_J_max) {
-        float JMh[3] = {J, 0., h};
+    if (M < 0.f || J > p.limit_J_max) {
+        float JMh[3] = {J, 0.f, h};
         copy_f3(out, JMh);
         return;
     }
@@ -1567,7 +1567,7 @@ __DEVICE__ void gamut_compress_fwd(float out[3], float JMh[3], ODTParams p) {
 
 __DEVICE__ void outputTransform_fwd(float RGBout[3], float aces[3], ODTParams p) {
     float AP0_clamped[3];
-    clamp_AP0_to_AP1(AP0_clamped, aces, 0., p.ts.forward_limit);
+    clamp_AP0_to_AP1(AP0_clamped, aces, 0.f, p.ts.forward_limit);
 
     float JMh[3];
     RGB_to_JMh(JMh, AP0_clamped, p.input_params);
@@ -1592,14 +1592,14 @@ __DEVICE__ void outputTransform_fwd(float RGBout[3], float aces[3], ODTParams p)
 //     inverse direction, the white scaling is removed.
 __DEVICE__ void apply_white_scale(float out[3], float rgb[3], float MAT_limit_to_display[3][3], bool invert) {
     float RGB_w_f[3];
-    float one_vec[3] = {1.0, 1.0, 1.0};
+    float one_vec[3] = {1.0f, 1.0f, 1.0f};
     vm_3_33(RGB_w_f, one_vec, MAT_limit_to_display);
-    float scale = 1. / _fmaxf(_fmaxf(RGB_w_f[0], RGB_w_f[1]), RGB_w_f[2]);
+    float scale = 1.f / _fmaxf(_fmaxf(RGB_w_f[0], RGB_w_f[1]), RGB_w_f[2]);
     // scale factor is equal to 1/largestChannel
 
     if (invert) {
         float rgb_temp[3];
-        fv_f_f3(rgb_temp, 1. / scale, rgb);
+        fv_f_f3(rgb_temp, 1.f / scale, rgb);
         clamp_f3(out, rgb_temp, 0, 1);
     } else {
         fv_f_f3(out, scale, rgb);
@@ -1612,18 +1612,18 @@ __DEVICE__ void apply_white_scale(float out[3], float rgb[3], float MAT_limit_to
 // sections of SMPTE ST 2084-2014
 __DEVICE__ float Y_to_ST2084(float C) {
     // Constants from SMPTE ST 2084-2014
-    const float pq_m1 = 0.1593017578125; // ( 2610.0 / 4096.0 ) / 4.0;
-    const float pq_m2 = 78.84375;        // ( 2523.0 / 4096.0 ) * 128.0;
-    const float pq_c1 = 0.8359375;       // 3424.0 / 4096.0 or pq_c3 - pq_c2 + 1.0;
-    const float pq_c2 = 18.8515625;      // ( 2413.0 / 4096.0 ) * 32.0;
-    const float pq_c3 = 18.6875;         // ( 2392.0 / 4096.0 ) * 32.0;
+    const float pq_m1 = 0.1593017578125f; // ( 2610.0f / 4096.0f ) / 4.0f;
+    const float pq_m2 = 78.84375f;        // ( 2523.0f / 4096.0f ) * 128.0f;
+    const float pq_c1 = 0.8359375f;       // 3424.0f / 4096.0f or pq_c3 - pq_c2 + 1.0f;
+    const float pq_c2 = 18.8515625f;      // ( 2413.0f / 4096.0f ) * 32.0f;
+    const float pq_c3 = 18.6875f;         // ( 2392.0f / 4096.0f ) * 32.0f;
 
-    const float pq_C = 10000.0;
+    const float pq_C = 10000.0f;
     // Note that this does NOT handle any of the signal range
     // considerations from 2084 - this returns full range (0 - 1)
     float L = C / pq_C;
     float Lm = powf(L, pq_m1);
-    float N = (pq_c1 + pq_c2 * Lm) / (1.0 + pq_c3 * Lm);
+    float N = (pq_c1 + pq_c2 * Lm) / (1.0f + pq_c3 * Lm);
     N = powf(N, pq_m2);
     return N;
 }
@@ -1634,21 +1634,21 @@ __DEVICE__ float Y_to_ST2084(float C) {
 // sections of SMPTE ST 2084-2014
 __DEVICE__ float ST2084_to_Y(float N) {
     // Constants from SMPTE ST 2084-2014
-    const float pq_m1 = 0.1593017578125; // ( 2610.0 / 4096.0 ) / 4.0;
-    const float pq_m2 = 78.84375;        // ( 2523.0 / 4096.0 ) * 128.0;
-    const float pq_c1 = 0.8359375;       // 3424.0 / 4096.0 or pq_c3 - pq_c2 + 1.0;
-    const float pq_c2 = 18.8515625;      // ( 2413.0 / 4096.0 ) * 32.0;
-    const float pq_c3 = 18.6875;         // ( 2392.0 / 4096.0 ) * 32.0;
+    const float pq_m1 = 0.1593017578125f; // ( 2610.0f / 4096.0f ) / 4.0f;
+    const float pq_m2 = 78.84375f;        // ( 2523.0f / 4096.0f ) * 128.0f;
+    const float pq_c1 = 0.8359375f;       // 3424.0f / 4096.0f or pq_c3 - pq_c2 + 1.0f;
+    const float pq_c2 = 18.8515625f;      // ( 2413.0f / 4096.0f ) * 32.0f;
+    const float pq_c3 = 18.6875f;         // ( 2392.0f / 4096.0f ) * 32.0f;
 
-    const float pq_C = 10000.0;
+    const float pq_C = 10000.0f;
     // Note that this does NOT handle any of the signal range
     // considerations from 2084 - this assumes full range (0 - 1)
-    float Np = powf(N, 1.0 / pq_m2);
+    float Np = powf(N, 1.0f / pq_m2);
     float L = Np - pq_c1;
-    if (L < 0.0)
-        L = 0.0;
+    if (L < 0.0f)
+        L = 0.0f;
     L = L / (pq_c2 - pq_c3 * Np);
-    L = powf(L, 1.0 / pq_m1);
+    L = powf(L, 1.0f / pq_m1);
     return L * pq_C; // returns cd/m^2
 }
 
@@ -1674,56 +1674,56 @@ __DEVICE__ void ST2084_to_HLG_1000nits_f3(float HLG[3], float PQ[3]) {
 
     // HLG Inverse EOTF (i.e. HLG inverse OOTF followed by the HLG OETF)
     // HLG Inverse OOTF (display linear to scene linear)
-    float Y_d = 0.2627 * displayLinear[0] + 0.6780 * displayLinear[1] + 0.0593 * displayLinear[2];
-    const float L_w = 1000.;
-    const float L_b = 0.;
+    float Y_d = 0.2627f * displayLinear[0] + 0.6780f * displayLinear[1] + 0.0593f * displayLinear[2];
+    const float L_w = 1000.f;
+    const float L_b = 0.f;
     const float alpha = (L_w - L_b);
     const float beta = L_b;
-    const float gamma = 1.2;
+    const float gamma = 1.2f;
 
     float sceneLinear[3];
-    if (Y_d == 0.) {
+    if (Y_d == 0.f) {
         /* This case is to protect against pow(0,-N)=Inf error. The ITU document
         does not offer a recommendation for this corner case. There may be a
         better way to handle this, but for now, this works.
         */
-        sceneLinear[0] = 0.;
-        sceneLinear[1] = 0.;
-        sceneLinear[2] = 0.;
+        sceneLinear[0] = 0.f;
+        sceneLinear[1] = 0.f;
+        sceneLinear[2] = 0.f;
     } else {
-        sceneLinear[0] = powf((Y_d - beta) / alpha, (1. - gamma) / gamma) * ((displayLinear[0] - beta) / alpha);
-        sceneLinear[1] = powf((Y_d - beta) / alpha, (1. - gamma) / gamma) * ((displayLinear[1] - beta) / alpha);
-        sceneLinear[2] = powf((Y_d - beta) / alpha, (1. - gamma) / gamma) * ((displayLinear[2] - beta) / alpha);
+        sceneLinear[0] = powf((Y_d - beta) / alpha, (1.f - gamma) / gamma) * ((displayLinear[0] - beta) / alpha);
+        sceneLinear[1] = powf((Y_d - beta) / alpha, (1.f - gamma) / gamma) * ((displayLinear[1] - beta) / alpha);
+        sceneLinear[2] = powf((Y_d - beta) / alpha, (1.f - gamma) / gamma) * ((displayLinear[2] - beta) / alpha);
     }
 
     // HLG OETF (scene linear to non-linear signal value)
-    const float a = 0.17883277;
-    const float b = 0.28466892; // 1.-4.*a;
-    const float c = 0.55991073; // 0.5-a*log(4.*a);
+    const float a = 0.17883277f;
+    const float b = 0.28466892f; // 1.f-4.f*a;
+    const float c = 0.55991073f; // 0.5f-a*log(4.f*a);
 
-    if (sceneLinear[0] <= 1. / 12) {
-        HLG[0] = _sqrtf(3. * sceneLinear[0]);
+    if (sceneLinear[0] <= 1.f / 12) {
+        HLG[0] = _sqrtf(3.f * sceneLinear[0]);
     } else {
-        HLG[0] = a * _logf(12. * sceneLinear[0] - b) + c;
+        HLG[0] = a * _logf(12.f * sceneLinear[0] - b) + c;
     }
-    if (sceneLinear[1] <= 1. / 12) {
-        HLG[1] = _sqrtf(3. * sceneLinear[1]);
+    if (sceneLinear[1] <= 1.f / 12) {
+        HLG[1] = _sqrtf(3.f * sceneLinear[1]);
     } else {
-        HLG[1] = a * _logf(12. * sceneLinear[1] - b) + c;
+        HLG[1] = a * _logf(12.f * sceneLinear[1] - b) + c;
     }
-    if (sceneLinear[2] <= 1. / 12) {
-        HLG[2] = _sqrtf(3. * sceneLinear[2]);
+    if (sceneLinear[2] <= 1.f / 12) {
+        HLG[2] = _sqrtf(3.f * sceneLinear[2]);
     } else {
-        HLG[2] = a * _logf(12. * sceneLinear[2] - b) + c;
+        HLG[2] = a * _logf(12.f * sceneLinear[2] - b) + c;
     }
 }
 
 // The reverse EOTF specified in Rec. ITU-R BT.1886
 // L = a(max[(V+b),0])^g
 __DEVICE__ float bt1886_inv(float L, float gamma, float Lw, float Lb) {
-    float a = powf(powf(Lw, 1. / gamma) - powf(Lb, 1. / gamma), gamma);
-    float b = powf(Lb, 1. / gamma) / (powf(Lw, 1. / gamma) - powf(Lb, 1. / gamma));
-    float V = powf(_fmaxf(L / a, 0.), 1. / gamma) - b;
+    float a = powf(powf(Lw, 1.f / gamma) - powf(Lb, 1.f / gamma), gamma);
+    float b = powf(Lb, 1.f / gamma) / (powf(Lw, 1.f / gamma) - powf(Lb, 1.f / gamma));
+    float V = powf(_fmaxf(L / a, 0.f), 1.f / gamma) - b;
     return V;
 }
 
@@ -1735,10 +1735,10 @@ __DEVICE__ void bt1886_inv_f3(float V[3], float L[3], float gamma, float Lw, flo
 
 __DEVICE__ float moncurve_inv(float y, float gamma, float offs) {
     float x;
-    const float yb = powf(offs * gamma / ((gamma - 1.0) * (1.0 + offs)), gamma);
-    const float rs = powf((gamma - 1.0) / offs, gamma - 1.0) * powf((1.0 + offs) / gamma, gamma);
+    const float yb = powf(offs * gamma / ((gamma - 1.0f) * (1.0f + offs)), gamma);
+    const float rs = powf((gamma - 1.0f) / offs, gamma - 1.0f) * powf((1.0f + offs) / gamma, gamma);
     if (y >= yb) {
-        x = (1.0 + offs) * powf(y, 1.0 / gamma) - offs;
+        x = (1.0f + offs) * powf(y, 1.0f / gamma) - offs;
     } else {
         x = y * rs;
     }
@@ -1756,9 +1756,9 @@ __DEVICE__ void eotf_inv(float cv[3], float rgb_linear_in[3], int eotf_enum) {
     // is clamped from 0-peakLuminance in the white limiting step but sometimes
     // a very small negative value can be reintroduced from precision errors.
     float rgb_linear[3];
-    rgb_linear[0] = _fmaxf(0.0, rgb_linear_in[0]);
-    rgb_linear[1] = _fmaxf(0.0, rgb_linear_in[1]);
-    rgb_linear[2] = _fmaxf(0.0, rgb_linear_in[2]);
+    rgb_linear[0] = _fmaxf(0.0f, rgb_linear_in[0]);
+    rgb_linear[1] = _fmaxf(0.0f, rgb_linear_in[1]);
+    rgb_linear[2] = _fmaxf(0.0f, rgb_linear_in[2]);
 
     if (eotf_enum == 0) {
         // display linear
@@ -1777,16 +1777,16 @@ __DEVICE__ void eotf_inv(float cv[3], float rgb_linear_in[3], int eotf_enum) {
         ST2084_to_HLG_1000nits_f3(cv, PQ);
     } else if (eotf_enum == 3) {
         // gamma 2.6
-        powf3(cv, rgb_linear, 1 / 2.6);
+        powf3(cv, rgb_linear, 1 / 2.6f);
     } else if (eotf_enum == 4) {
         // BT.1886 with gamma 2.4
-        bt1886_inv_f3(cv, rgb_linear, 2.4, 1.0, 0.0);
+        bt1886_inv_f3(cv, rgb_linear, 2.4f, 1.0f, 0.0f);
     } else if (eotf_enum == 5) {
         // gamma 2.2
-        powf3(cv, rgb_linear, 1 / 2.2);
+        powf3(cv, rgb_linear, 1 / 2.2f);
     } else {
         // sRGB IEC 61966-2-1:1999
-        moncurve_inv_f3(cv, rgb_linear, 2.4, 0.055);
+        moncurve_inv_f3(cv, rgb_linear, 2.4f, 0.055f);
     }
 }
 
@@ -1810,24 +1810,24 @@ __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p
     // Chromaticities of limiting primaries and white point
     const Chromaticities limitingPri = // P3 Primaries / D65 White
         {
-            {0.6800, 0.3200},
-            {0.2650, 0.6900},
-            {0.1500, 0.0600},
-            {0.3127, 0.3290},
+            {0.6800f, 0.3200f},
+            {0.2650f, 0.6900f},
+            {0.1500f, 0.0600f},
+            {0.3127f, 0.3290f},
         };
 
-    const float peakLuminance = 1000.; // luminance the tone scale highlight rolloff will target in cd/m^2 (nits)
-    const bool scale_white = false;    // apply scaling to compress output so that largest channel hits 1.0; usually enabled when using a
+    const float peakLuminance = 1000.f; // luminance the tone scale highlight rolloff will target in cd/m^2 (nits)
+    const bool scale_white = false;    // apply scaling to compress output so that largest channel hits 1.0f; usually enabled when using a
                                        // limiting white different from the encoding white
 
     // Encoding
     // Chromaticities of display primaries and white point
     const Chromaticities encodingPri = // P3 Primaries / D65 White
         {
-            {0.6800, 0.3200},
-            {0.2650, 0.6900},
-            {0.1500, 0.0600},
-            {0.3127, 0.3290},
+            {0.6800f, 0.3200f},
+            {0.2650f, 0.6900f},
+            {0.1500f, 0.0600f},
+            {0.3127f, 0.3290f},
         };
 
     // EOTF of display (output is encoded with the inverse EOTF)
@@ -1842,7 +1842,7 @@ __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p
 
     // ---- ---- ---- ---- ---- ---- //
 
-    const float linear_scale_factor = 1.0;
+    const float linear_scale_factor = 1.0f;
 
     // Initialization functions
     // These only need to be calculated once and are done here at the global level to assure they are not done per pixel.
@@ -1852,9 +1852,9 @@ __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p
 
     float MATRIX_limit_to_display[3][3];
     float rgb_to_xyz[3][3];
-    RGBtoXYZ_f33(rgb_to_xyz, limitingPri, 1.0);
+    RGBtoXYZ_f33(rgb_to_xyz, limitingPri, 1.0f);
     float xyz_to_rgb[3][3];
-    XYZtoRGB_f33(xyz_to_rgb, encodingPri, 1.0);
+    XYZtoRGB_f33(xyz_to_rgb, encodingPri, 1.0f);
     mm_33_33(MATRIX_limit_to_display, rgb_to_xyz, xyz_to_rgb);
 
     // ---- ---- ---- ---- ---- ---- //
@@ -1870,7 +1870,7 @@ __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p
 
     // ---- Clamp to peak luminance ---- //
     float rgb2[3];
-    clamp_f3(rgb2, rgb, 0.0, peakLuminance / ref_luminance);
+    clamp_f3(rgb2, rgb, 0.0f, peakLuminance / ref_luminance);
 
     // ---- Scale white, needed if limiting white != encoding white ----
     float rgb3[3];

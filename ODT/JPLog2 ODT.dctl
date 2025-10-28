@@ -10,10 +10,10 @@ DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
  * This can be used as an ODT in Resolve.
  */
 __DEVICE__ float linear_to_jplog2(float in) {
-    const float JPLOG2_LIN_BRKPNT = 0.00680;
-    const float JPLOG2_LOG_BRKPNT = 0.16129; /* 10bit cv = 165 */
-    const float JPLOG2_LINTOLOG_SLOPE = 10.367739;
-    const float JPLOG2_LINTOLOG_YINT = 0.0907775;
+    const float JPLOG2_LIN_BRKPNT = 0.00680f;
+    const float JPLOG2_LOG_BRKPNT = 0.16129f; /* 10bit cv = 165 */
+    const float JPLOG2_LINTOLOG_SLOPE = 10.367739f;
+    const float JPLOG2_LINTOLOG_YINT = 0.0907775f;
     if (in <= JPLOG2_LIN_BRKPNT)
         return JPLOG2_LINTOLOG_SLOPE * in + JPLOG2_LINTOLOG_YINT;
     else /* if (in > JPLOG2_LIN_BRKPNT) */
@@ -22,9 +22,9 @@ __DEVICE__ float linear_to_jplog2(float in) {
 
 // Used inverse of matrix from the IDT.
 __CONSTANT__ float matrix[3][3] = {
-    {1.451439316071658, -0.236510746889360, -0.214928569308364},
-    {-0.076553773314263, 1.176229699811789, -0.099675926450361},
-    {0.008316148424961, -0.006032449790909, 0.997716301412982},
+    {1.451439316071658f, -0.236510746889360f, -0.214928569308364f},
+    {-0.076553773314263f, 1.176229699811789f, -0.099675926450361f},
+    {0.008316148424961f, -0.006032449790909f, 0.997716301412982f},
 };
 
 __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {

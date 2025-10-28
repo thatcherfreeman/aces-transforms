@@ -4,7 +4,7 @@ DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
 
 __DEVICE__ float protune_to_linear(float t) {
     // Protune function taken from https://nick-shaw.github.io/cinematiccolor/common-rgb-color-spaces.html
-    return (_powf(113.0, t) - 1.0) / 112.0;
+    return (_powf(113.0f, t) - 1.0f) / 112.0f;
 }
 
 __DEVICE__ float3 mv_33_3(float mat[3][3], float3 v) {
@@ -18,21 +18,21 @@ __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p
     float3 rgb = make_float3(protune_to_linear(p_R), protune_to_linear(p_G), protune_to_linear(p_B));
 
     // Convert to flat profile via a gamma adjustment
-    rgb.x = _copysignf(_powf(_fabs(rgb.x), 0.75), rgb.x);
-    rgb.y = _copysignf(_powf(_fabs(rgb.y), 0.75), rgb.y);
-    rgb.z = _copysignf(_powf(_fabs(rgb.z), 0.75), rgb.z);
+    rgb.x = _copysignf(_powf(_fabs(rgb.x), 0.75f), rgb.x);
+    rgb.y = _copysignf(_powf(_fabs(rgb.y), 0.75f), rgb.y);
+    rgb.z = _copysignf(_powf(_fabs(rgb.z), 0.75f), rgb.z);
 
     // Estimated from some gray card exposures.
-    const float gain = 1.46014;
+    const float gain = 1.46014f;
     rgb *= gain;
 
     // Used values calculated from http://color.support/colorspacecalculator.html
     // Native color primaries taken from https://nick-shaw.github.io/cinematiccolor/common-rgb-color-spaces.html
     // Probably still Bradford chromatic adaptation though.
     float matrix[3][3] = {
-        {0.533811, 0.322379, 0.143810},
-        {-0.050103, 1.073308, -0.023205},
-        {0.070750, -0.285111, 1.214361},
+        {0.533811f, 0.322379f, 0.143810f},
+        {-0.050103f, 1.073308f, -0.023205f},
+        {0.070750f, -0.285111f, 1.214361f},
     };
 
     float3 rgb2 = mv_33_3(matrix, rgb);

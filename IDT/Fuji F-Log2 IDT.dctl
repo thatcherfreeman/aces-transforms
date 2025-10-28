@@ -30,9 +30,9 @@ __DEVICE__ inline float flog2_to_linear(float t) {
 // Used values calculated from https://www.colour-science.org:8010/apps/rgb_colourspace_transformation_matrix
 // source color space BT 2020 and Output ACES AP0, with CAT02 chromatic adaptation.
 __CONSTANT__ float matrix[3][3] = {
-    {0.678891150633901, 0.158868422372023, 0.162240427036943},
-    {0.045570830898022, 0.860712772028847, 0.093716397078886},
-    {-0.000485710351836, 0.025060195736250, 0.975425514615082},
+    {0.678891150633901f, 0.158868422372023f, 0.162240427036943f},
+    {0.045570830898022f, 0.860712772028847f, 0.093716397078886f},
+    {-0.000485710351836f, 0.025060195736250f, 0.975425514615082f},
 };
 
 __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
