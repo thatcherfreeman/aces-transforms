@@ -15,6 +15,7 @@ IDTs and ODTs are provided for the following log curves/image profiles:
 - GoPro ProTune Native, Color Profile
 - GoPro ProTune Native, Flat Profile
 - JPLog2
+- Kinefinity KineLog3
 - Leica L-Log
 - Nikon N-Log
 - Phantom Log1

@@ -1,0 +1,46 @@
+// clang-format off
+DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+// clang-format on
+
+/**
+ * Kinefinity KineLog3 to ACES AP0 conversion.
+ * Goes from KineLog3 and Kinefinity Wide Gamut
+ * to scene linear, ACES AP0 gamut.
+ *
+ * This can be used as an IDT in Resolve.
+ */
+__DEVICE__ float kinelog3_to_linear(float x) {
+    const float a = 66.64f;
+    const float b = 0.296f;
+    const float c = 0.907136f;
+    const float d = 0.092864f;
+    const float cut = -0.008239f;
+    const float s = 0.017178f;
+
+    float out;
+    if (x < 0.0f) {
+        out = x * s + cut;
+    } else {
+        out = (_exp10f(((x - d) / b) / c) - 1.0f) / a;
+    }
+    return out;
+}
+
+__CONSTANT__ float matrix[3][3] = {
+    {0.7315397790, 0.2258281521, 0.0426320689},
+    {-0.0542290907, 1.3346840509, -0.2804549602},
+    {0.0118228297, -0.3105183535, 1.2986955238},
+};
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
+    float r = kinelog3_to_linear(p_R);
+    float g = kinelog3_to_linear(p_G);
+    float b = kinelog3_to_linear(p_B);
+
+    float r2 = (matrix[0][0] * r) + (matrix[0][1] * g) + (matrix[0][2] * b);
+    float g2 = (matrix[1][0] * r) + (matrix[1][1] * g) + (matrix[1][2] * b);
+    float b2 = (matrix[2][0] * r) + (matrix[2][1] * g) + (matrix[2][2] * b);
+
+    float3 res = make_float3(r2, g2, b2);
+    return res;
+}
