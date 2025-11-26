@@ -80,10 +80,10 @@ __DEVICE__ float segmented_spline_c5_fwd(float x) {
         // coefsHigh[6]
         {-0.7185482425f, 2.0810307172f, 3.6681241237f, 4.0000000000f, 4.0000000000f, 4.0000000000f},
         {0.18f * _powf(2.f, -15.0f), 0.0001f}, // minPoint
-        {0.18f, 4.8f},                       // midPoint
+        {0.18f, 4.8f},                         // midPoint
         {0.18f * _powf(2.f, 18.0f), 10000.f},  // maxPoint
-        0.0f,                               // slopeLow
-        0.0f                                // slopeHigh
+        0.0f,                                  // slopeLow
+        0.0f                                   // slopeHigh
     };
     SegmentedSplineParams_c5 C = RRT_PARAMS;
 
@@ -163,10 +163,10 @@ float segmented_spline_c9_fwd(float x) {
          1.6878733390f,
          1.6878733390f},
         {segmented_spline_c5_fwd(0.18f * _powf(2.f, -6.5f)), 0.02f}, // minPoint
-        {segmented_spline_c5_fwd(0.18f), 4.8f},                    // midPoint
+        {segmented_spline_c5_fwd(0.18f), 4.8f},                      // midPoint
         {segmented_spline_c5_fwd(0.18f * _powf(2.f, 6.5f)), 48.0f},  // maxPoint
-        0.0f,                                                     // slopeLow
-        0.04f                                                     // slopeHigh
+        0.0f,                                                        // slopeLow
+        0.04f                                                        // slopeHigh
     };
     SegmentedSplineParams_c9 C = ODT_48nits;
     float M[3][3] = {

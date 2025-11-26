@@ -1,0 +1,52 @@
+// clang-format off
+DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+// clang-format on
+
+/**
+ * Samsung Log to ACES AP0 conversion.
+ * Goes from Samsung Log and Rec2020 primaries
+ * to scene linear, ACES AP0 gamut.
+ *
+ * This can be used as an IDT in Resolve.
+ */
+
+__DEVICE__ float samsung_log_to_linear(float y) {
+    const float a1 = 0.258984868f;
+    const float b1 = 0.0003645f;
+    const float y1 = 0.720504856f;
+    const float a2 = -0.20942f;
+    const float b2 = 0.016904f;
+    const float y2 = -0.24597f;
+
+    const float x0 = -0.05f;
+    const float yt = 0.206561909f;
+    float out;
+    if (y >= yt) {
+        out = _exp10f((y - y1) / a1) - b1;
+    } else if (x >= x0) {
+        out = -1.0f * (_exp10f((y - y2) / a2)) + b2;
+    } else {
+        out = x0;
+    }
+    return out;
+}
+
+// Used values calculated from https://www.colour-science.org:8010/apps/rgb_colourspace_transformation_matrix
+// source color space BT 2020 and Output ACES AP0, with CAT02 chromatic adaptation.
+__CONSTANT__ float matrix[3][3] = {
+    {0.678891150633901f, 0.158868422372023f, 0.162240427036943f},
+    {0.045570830898022f, 0.860712772028847f, 0.093716397078886f},
+    {-0.000485710351836f, 0.025060195736250f, 0.975425514615082f},
+};
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
+    float r = samsung_log_to_linear(p_R);
+    float g = samsung_log_to_linear(p_G);
+    float b = samsung_log_to_linear(p_B);
+
+    float r2 = (matrix[0][0] * r) + (matrix[0][1] * g) + (matrix[0][2] * b);
+    float g2 = (matrix[1][0] * r) + (matrix[1][1] * g) + (matrix[1][2] * b);
+    float b2 = (matrix[2][0] * r) + (matrix[2][1] * g) + (matrix[2][2] * b);
+
+    float3 res = make_float3(r2, g2, b2);
+    return res;
+}

@@ -1,0 +1,51 @@
+// clang-format off
+DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+// clang-format on
+
+/**
+ * Samsung Log to ACES AP0 conversion.
+ * Goes from Samsung Log and Rec2020 primaries
+ * to scene linear, ACES AP0 gamut.
+ *
+ * This can be used as an IDT in Resolve.
+ */
+__DEVICE__ float linear_to_samsung_log(float x) {
+    const float a1 = 0.258984868f;
+    const float b1 = 0.0003645f;
+    const float y1 = 0.720504856f;
+    const float a2 = -0.20942f;
+    const float b2 = 0.016904f;
+    const float y2 = -0.24597f;
+
+    const float x0 = -0.05f;
+    const float xt = 0.01f;
+    float out;
+    if (x >= xt) {
+        out = a1 * _log10f(x + b1) + y1;
+    } else if (x >= x0) {
+        out = a2 * _log10f(-x + b2) + y2;
+    } else {
+        out = 0.0f;
+    }
+    return out;
+}
+
+// Used inverse of matrix from the IDT.
+__CONSTANT__ float matrix[3][3] = {
+    {1.490868704657009f, -0.268712979082956f, -0.222155725704626f},
+    {-0.079237210602833f, 1.179368583111103f, -0.100131372460806f},
+    {0.002778100767079f, -0.030433614631534f, 1.027655513912370f},
+};
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
+    float r = (matrix[0][0] * p_R) + (matrix[0][1] * p_G) + (matrix[0][2] * p_B);
+    float g = (matrix[1][0] * p_R) + (matrix[1][1] * p_G) + (matrix[1][2] * p_B);
+    float b = (matrix[2][0] * p_R) + (matrix[2][1] * p_G) + (matrix[2][2] * p_B);
+
+    float r2 = linear_to_samsung_log(r);
+    float g2 = linear_to_samsung_log(g);
+    float b2 = linear_to_samsung_log(b);
+
+    float3 res = make_float3(r2, g2, b2);
+    return res;
+}
