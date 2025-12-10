@@ -1,0 +1,57 @@
+// clang-format off
+DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+// clang-format on
+
+__DEVICE__ float powf(float base, float exp) {
+    return _copysignf(_powf(_fabs(base), exp), base);
+}
+
+__DEVICE__ float ember_hlg_to_linear(float x) {
+
+    const float slope = 2.818105697631836f;
+    const float offset = 0.0f;
+    const float offset2 = -0.004920648410916328f;
+    const float power = 0.4226517677307129f;
+    const float cut = 0.11711454391479492f;
+    const float a = 0.1274157464504242f;
+    const float b = 0.5203865170478821f;
+    const float c = 0.7146257162094116f;
+    const float mid_gray_scaling = 4.307229518890381f;
+
+    const float log_cut = powf(cut * slope + offset, power) + offset2;
+
+    float output;
+    if (x < log_cut) {
+        output = (powf(x - offset2, 1.0f / power) - offset) / slope;
+    } else {
+        output = (_expf((x - c) / a) + b) * cut;
+    }
+    output *= mid_gray_scaling;
+    return output;
+}
+
+// Used values calculated from https://www.colour-science.org:8010/apps/rgb_colourspace_transformation_matrix
+// source color space BT 2020 and Output ACES AP0, with CAT02 chromatic adaptation.
+__CONSTANT__ float matrix[3][3] = {
+    {0.678891150633901f, 0.158868422372023f, 0.162240427036943f},
+    {0.045570830898022f, 0.860712772028847f, 0.093716397078886f},
+    {-0.000485710351836f, 0.025060195736250f, 0.975425514615082f},
+};
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
+    float3 rgb = make_float3(ember_hlg_to_linear(p_R), ember_hlg_to_linear(p_G), ember_hlg_to_linear(p_B));
+    // Map 37% input to mid gray.
+    const float gain = 0.18f / 0.15f;
+    rgb *= gain;
+
+    float r = rgb.x;
+    float g = rgb.y;
+    float b = rgb.z;
+
+    float r2 = (matrix[0][0] * r) + (matrix[0][1] * g) + (matrix[0][2] * b);
+    float g2 = (matrix[1][0] * r) + (matrix[1][1] * g) + (matrix[1][2] * b);
+    float b2 = (matrix[2][0] * r) + (matrix[2][1] * g) + (matrix[2][2] * b);
+
+    float3 res = make_float3(r2, g2, b2);
+    return res;
+}

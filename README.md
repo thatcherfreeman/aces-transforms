@@ -9,6 +9,7 @@ IDTs and ODTs are provided for the following log curves/image profiles:
 - Apple Log
 - DJI D-Log
 - DaVinci Intermediate
+- Freefly Ember HLG
 - Fuji F-Log
 - Fuji F-Log2
 - Fuji F-Log2 C

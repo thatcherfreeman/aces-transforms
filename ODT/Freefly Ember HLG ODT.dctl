@@ -1,0 +1,51 @@
+// clang-format off
+DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+// clang-format on
+
+__DEVICE__ float powf(float base, float exp) {
+    return _copysignf(_powf(_fabs(base), exp), base);
+}
+
+__DEVICE__ inline float linear_to_ember_hlg(float x) {
+    const float slope = 2.818105697631836f;
+    const float offset = 0.0f;
+    const float offset2 = -0.004920648410916328f;
+    const float power = 0.4226517677307129f;
+    const float cut = 0.11711454391479492f;
+    const float a = 0.1274157464504242f;
+    const float b = 0.5203865170478821f;
+    const float c = 0.7146257162094116f;
+    const float mid_gray_scaling = 4.307229518890381f;
+
+    x /= mid_gray_scaling;
+    if (x < cut) {
+        return powf(x * slope + offset, power) + offset2;
+    } else {
+        return a * _logf(x / cut - b) + c;
+    }
+}
+
+// Used inverse of matrix from the IDT.
+__CONSTANT__ float matrix[3][3] = {
+    {1.4908687047f, -0.2687129791f, -0.2221557257f},
+    {-0.0792372106f, 1.1793685831f, -0.1001313725f},
+    {0.0027781008f, -0.0304336146f, 1.0276555139f},
+};
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
+    float r = (matrix[0][0] * p_R) + (matrix[0][1] * p_G) + (matrix[0][2] * p_B);
+    float g = (matrix[1][0] * p_R) + (matrix[1][1] * p_G) + (matrix[1][2] * p_B);
+    float b = (matrix[2][0] * p_R) + (matrix[2][1] * p_G) + (matrix[2][2] * p_B);
+
+    const float gain = 0.18f / 0.15f;
+    r /= gain;
+    g /= gain;
+    b /= gain;
+
+    float r2 = linear_to_ember_hlg(r);
+    float g2 = linear_to_ember_hlg(g);
+    float b2 = linear_to_ember_hlg(b);
+
+    float3 res = make_float3(r2, g2, b2);
+    return res;
+}
