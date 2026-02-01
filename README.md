@@ -23,6 +23,7 @@ IDTs and ODTs are provided for the following log curves/image profiles:
 - Nikon N-Log
 - Phantom Log1
 - Phantom Log2
+- Samsung Log
 - ZCAM Z-Log2
 
 ## Display ODTs
