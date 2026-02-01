@@ -1,0 +1,48 @@
+// clang-format off
+DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+// clang-format on
+
+// IDT goes from Filmlight T-Log E-Gamut v2 to ACES AP0.
+
+__DEVICE__ float tlog_to_linear(float in) {
+    float out;
+    float w = 128.f;
+    float g = 16.f;
+    float o = 0.075f;
+
+    float b = 1.f / (0.7107f + 1.2359f * _logf(w * g));
+    float gs = g / (1.f - o);
+    float C = b / gs;
+    float a = 1.f - b * _logf(w + C);
+    float y0 = a + b * _logf(C);
+    float s = (1.f - o) / (1.f - y0);
+    float A = 1.f + (a - 1.f) * s;
+    float B = b * s;
+    float G = gs * s;
+
+    out = in < o ? (in - o) / G : _expf((in - A) / B) - C;
+    return out;
+}
+
+// Used values calculated from https://www.colour-science.org:8010/apps/rgb_colourspace_transformation_matrix
+// source color space FilmLight E-Gamut V2 and Output ACES AP0, with CAT02 chromatic adaptation.
+__CONSTANT__ float matrix[3][3] = {
+    {0.786790831990418f, 0.147306572407033f, 0.065903731358064f},
+    {0.002154565563565f, 1.062853478181982f, -0.065008551202845f},
+    {-0.114752966629915f, -0.081043763153700f, 1.195796958592755f},
+};
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
+    float3 rgb = make_float3(tlog_to_linear(p_R), tlog_to_linear(p_G), tlog_to_linear(p_B));
+
+    float r = rgb.x;
+    float g = rgb.y;
+    float b = rgb.z;
+
+    float r2 = (matrix[0][0] * r) + (matrix[0][1] * g) + (matrix[0][2] * b);
+    float g2 = (matrix[1][0] * r) + (matrix[1][1] * g) + (matrix[1][2] * b);
+    float b2 = (matrix[2][0] * r) + (matrix[2][1] * g) + (matrix[2][2] * b);
+
+    float3 res = make_float3(r2, g2, b2);
+    return res;
+}
