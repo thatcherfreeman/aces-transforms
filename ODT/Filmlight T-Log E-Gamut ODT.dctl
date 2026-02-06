@@ -21,7 +21,7 @@ __DEVICE__ float linear_to_tlog(float in) {
     return out;
 }
 
-// // Used values calculated from https://www.colour-science.org:8010/apps/rgb_colourspace_transformation_matrix
+// Used values calculated from https://www.colour-science.org:8010/apps/rgb_colourspace_transformation_matrix
 // source color space ACES AP0 and output FilmLight E-Gamut, with CAT02 chromatic adaptation.
 __CONSTANT__ float matrix[3][3] = {
     {1.324564697284136f, -0.238593817733000f, -0.085970879661792f},
