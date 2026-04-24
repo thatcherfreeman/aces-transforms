@@ -1,0 +1,51 @@
+// clang-format off
+DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+// clang-format on
+
+/**
+ * Apple Log to ACES AP0 conversion.
+ * Goes from Apple Log and Apple Log 2 gamut
+ * to scene linear, ACES AP0 gamut.
+ *
+ * This can be used as an IDT in Resolve.
+ */
+
+__DEVICE__ float apple_log_to_lin(float x) {
+    float out;
+    const float R0 = -0.05641088f;
+    const float Rt = 0.01f;
+    const float c = 47.28711236f;
+    const float b = 0.00964052f;
+    const float y = 0.08550479f;
+    const float d = 0.69336945f;
+    const float Pt = c * _powf(Rt - R0, 2.0f);
+
+    if (x >= Pt) {
+        out = _exp2f((x - d) / y) - b;
+    } else if (x > 0.0f) {
+        out = _sqrtf(x / c) + R0;
+    } else {
+        out = R0;
+    }
+    return out;
+}
+0
+    // source color space given by Apple Log 2 paper and Output ACES AP0, with CAT02 chromatic adaptation.
+    __CONSTANT__ float matrix[3][3] = {
+        {0.6947855343087408f, 0.2428153175260775f, 0.0623991481651801f},
+        {0.0469507367232474f, 1.0062732179485778f, -0.0532239546718262f},
+        {-0.0219809815086866f, -0.0331827320263113f, 1.0551637135349965f},
+};
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
+    float r = apple_log_to_lin(p_R);
+    float g = apple_log_to_lin(p_G);
+    float b = apple_log_to_lin(p_B);
+
+    float r2 = (matrix[0][0] * r) + (matrix[0][1] * g) + (matrix[0][2] * b);
+    float g2 = (matrix[1][0] * r) + (matrix[1][1] * g) + (matrix[1][2] * b);
+    float b2 = (matrix[2][0] * r) + (matrix[2][1] * g) + (matrix[2][2] * b);
+
+    float3 res = make_float3(r2, g2, b2);
+    return res;
+}

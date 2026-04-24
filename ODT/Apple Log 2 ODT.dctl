@@ -1,0 +1,51 @@
+// clang-format off
+DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+// clang-format on
+
+/**
+ * ACES AP0 to Apple Log conversion.
+ * Goes from scene linear, ACES AP0 gamut
+ * to Apple Log and Apple Log gamut (equivalent to BT 2020 gamut).
+ *
+ * This can be used as an ODT in Resolve.
+ */
+
+__DEVICE__ inline float linear_to_apple_log(float x) {
+    float out;
+    const float R0 = -0.05641088f;
+    const float Rt = 0.01f;
+    const float c = 47.28711236f;
+    const float b = 0.00964052f;
+    const float y = 0.08550479f;
+    const float d = 0.69336945f;
+    const float Pt = c * _powf(Rt - R0, 2.0f);
+
+    if (x >= Rt) {
+        out = y * _log2f(x + b) + d;
+    } else if (x > R0) {
+        out = c * (_powf(x - R0, 2.0f));
+    } else {
+        out = 0.0f;
+    }
+    return out;
+}
+
+// Used inverse of matrix from the IDT.
+__CONSTANT__ float matrix[3][3] = {
+    {1.4600336870027506f, -0.3557473675302592f, -0.1042863194724926f},
+    {-0.0666244075763974f, 1.0116551245826069f, 0.0549692829937888f},
+    {0.0283199594809194f, 0.0244036107992704f, 0.9472764297198102f},
+};
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
+    float r = (matrix[0][0] * p_R) + (matrix[0][1] * p_G) + (matrix[0][2] * p_B);
+    float g = (matrix[1][0] * p_R) + (matrix[1][1] * p_G) + (matrix[1][2] * p_B);
+    float b = (matrix[2][0] * p_R) + (matrix[2][1] * p_G) + (matrix[2][2] * p_B);
+
+    float r2 = linear_to_apple_log(r);
+    float g2 = linear_to_apple_log(g);
+    float b2 = linear_to_apple_log(b);
+
+    float3 res = make_float3(r2, g2, b2);
+    return res;
+}
