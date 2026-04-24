@@ -29,12 +29,12 @@ __DEVICE__ float apple_log_to_lin(float x) {
     }
     return out;
 }
-0
-    // source color space given by Apple Log 2 paper and Output ACES AP0, with CAT02 chromatic adaptation.
-    __CONSTANT__ float matrix[3][3] = {
-        {0.6947855343087408f, 0.2428153175260775f, 0.0623991481651801f},
-        {0.0469507367232474f, 1.0062732179485778f, -0.0532239546718262f},
-        {-0.0219809815086866f, -0.0331827320263113f, 1.0551637135349965f},
+
+// source color space given by Apple Log 2 paper and Output ACES AP0, with CAT02 chromatic adaptation.
+__CONSTANT__ float matrix[3][3] = {
+    {0.6947855343087408f, 0.2428153175260775f, 0.0623991481651801f},
+    {0.0469507367232474f, 1.0062732179485778f, -0.0532239546718262f},
+    {-0.0219809815086866f, -0.0331827320263113f, 1.0551637135349965f},
 };
 
 __DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
