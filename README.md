@@ -7,6 +7,7 @@ Support me at: [https://www.buymeacoffee.com/thatcherfreeman](https://www.buymea
 IDTs and ODTs are provided for the following log curves/image profiles:
 
 - Apple Log
+- Apple Log 2
 - DJI D-Log
 - DaVinci Intermediate
 - FilmLight T-Log E-Gamut
