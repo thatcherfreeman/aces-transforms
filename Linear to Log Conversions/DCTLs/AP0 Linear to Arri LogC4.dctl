@@ -1,0 +1,41 @@
+// clang-format off
+// clang-format on
+
+/**
+ * ACES AP0 to Arri LogC4 conversion.
+ * Goes from scene linear, ACES AP0 gamut
+ * to Arri Wide Gamut 4 and Arri LogC4 with CAT02 CAT.
+ */
+
+__DEVICE__ inline float linear_to_logc4(float x) {
+    float a = (_exp2f(18.0f) - 16.0f) / 117.45f;
+    float b = (1023.0f - 95.0f) / 1023.0f;
+    float c = 95.0f / 1023.0f;
+    float s = 7.0f * _logf(2.0f) * _exp2f(7.0f - 14.0f * c / b) / a * b;
+    float t = (_exp2f(-14.0f * c / b + 6.0f) - 64.0f) / a;
+
+    if (x >= t) {
+        return (_log2f(a * x + 64.0f) - 6.0f) * b / 14.0f + c;
+    } else {
+        return (x - t) / s;
+    }
+}
+
+__CONSTANT__ float matrix[3][3] = {
+    {1.331748921985824f, -0.191041831147747f, -0.140707090950014f},
+    {-0.001081025996725f, 0.992818721482875f, 0.008262304553437f},
+    {0.000663988214456f, 0.000751513727035f, 0.998584498106413f},
+};
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
+    float r = (matrix[0][0] * p_R) + (matrix[0][1] * p_G) + (matrix[0][2] * p_B);
+    float g = (matrix[1][0] * p_R) + (matrix[1][1] * p_G) + (matrix[1][2] * p_B);
+    float b = (matrix[2][0] * p_R) + (matrix[2][1] * p_G) + (matrix[2][2] * p_B);
+
+    float r2 = linear_to_logc4(r);
+    float g2 = linear_to_logc4(g);
+    float b2 = linear_to_logc4(b);
+
+    float3 res = make_float3(r2, g2, b2);
+    return res;
+}
