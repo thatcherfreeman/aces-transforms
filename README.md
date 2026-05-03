@@ -60,12 +60,28 @@ If you're in node-based color management, the only opportunities you have to do 
 
 For your convenience, I have created a folder called "Linear to Log Conversions" that you can put into your conventional LUT directory and therefore make these DCTLs accessible via the Input LUT right click menu.
 
-### IMPORTANT NOTE
-I've provided the linear to log conversions as DCTLs and as LUTs. Whenever possible, I urge you to use the DCTLs, but if you must use a 1D LUT, refer to the below information:
+I've provided the linear to log conversions as DCTLs and as LUTs. The DCTLs include both a primaries conversion and a linear to log conversion. The LUTs ONLY have a linear to log conversion with no primaries conversion at all. Whenever possible, I urge you to use the DCTLs, but if you must use a 1D LUT, refer to the below note:
+
+### IMPORTANT NOTE on LOG TO LINEAR LUTs
 
 Because the LUTs involve sampling, they are going to be limited in terms of the dynamic range in which they can accurately capture the linear to log function. Thus, for most of the Linear to Log LUTs, you'll see some errors in the shadows where the LUT returns a lower code value than the correct linear to log function. Due to their lower dynamic range and incidental log curve design, **the Linear to DaVinci Intermediate and Linear to Arri LogC3 have the least error of the linear to log LUTs.**
 
-The DCTLs include both a primaries conversion and a linear to log conversion. The LUTs ONLY have a linear to log conversion with no primaries conversion at all.
+If a Linear to Log LUT isn't looking anywhere close to what you'd expect, you probably need to comment out the line starting with `LUT_1D_INPUT_RANGE` within the .cube file. This tag is present because it's what Resolve expects, but other software expects only the `DOMAIN_MIN` and `DOMAIN_MAX` tags. After this change, it would look something like this:
+
+```
+old:
+# Comment out the LUT_1D_INPUT_RANGE line if it's not working for you.
+LUT_1D_INPUT_RANGE 0.0 100.0
+DOMAIN_MIN 0.0 0.0 0.0
+DOMAIN_MAX 100.0 100.0 100.0
+
+New:
+# Comment out the LUT_1D_INPUT_RANGE line if it's not working for you.
+# LUT_1D_INPUT_RANGE 0.0 100.0
+DOMAIN_MIN 0.0 0.0 0.0
+DOMAIN_MAX 100.0 100.0 100.0
+```
+
 
 ## Matrix calculator
 I used [this tool](https://www.colour-science.org:8010/apps/rgb_colourspace_transformation_matrix) to calculate the matrices here. Set it to CAT02 chromatic adaptation.
