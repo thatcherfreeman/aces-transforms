@@ -22,6 +22,7 @@ IDTs and ODTs are provided for the following log curves/image profiles:
 - Kinefinity KineLog3
 - Leica L-Log
 - Nikon N-Log
+- Oppo O-Log
 - Phantom Log1
 - Phantom Log2
 - Samsung Log

@@ -1,0 +1,42 @@
+// clang-format off
+DEFINE_ACES_PARAM(IS_PARAMETRIC_ACES_TRANSFORM: 0)
+// clang-format on
+
+/**
+ * ACES AP0 to Oppo O-Log conversion.
+ * Goes from scene linear, ACES AP0 gamut
+ * to Oppo O-Log and BT 2020 Gamut
+ *
+ * This can be used as an ODT in Resolve.
+ */
+
+__DEVICE__ inline float linear_to_olog(float x) {
+    const float Y = 0.139f;
+    const float B = 0.019f;
+    const float S = 0.614f;
+    const float R = 0.0631271f;
+
+    // Clamp needed to avoid breakage.
+    float out = Y * _logf(_fmaxf(x + B, 1e-8f)) + S;
+    return out;
+}
+
+// Used inverse of matrix from the IDT.
+__CONSTANT__ float matrix[3][3] = {
+    {1.490868704657009f, -0.268712979082956f, -0.222155725704626f},
+    {-0.079237210602833f, 1.179368583111103f, -0.100131372460806f},
+    {0.002778100767079f, -0.030433614631534f, 1.027655513912370f},
+};
+
+__DEVICE__ float3 transform(int p_Width, int p_Height, int p_X, int p_Y, float p_R, float p_G, float p_B) {
+    float r = (matrix[0][0] * p_R) + (matrix[0][1] * p_G) + (matrix[0][2] * p_B);
+    float g = (matrix[1][0] * p_R) + (matrix[1][1] * p_G) + (matrix[1][2] * p_B);
+    float b = (matrix[2][0] * p_R) + (matrix[2][1] * p_G) + (matrix[2][2] * p_B);
+
+    float r2 = linear_to_olog(r);
+    float g2 = linear_to_olog(g);
+    float b2 = linear_to_olog(b);
+
+    float3 res = make_float3(r2, g2, b2);
+    return res;
+}
