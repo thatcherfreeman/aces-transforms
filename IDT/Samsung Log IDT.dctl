@@ -23,7 +23,7 @@ __DEVICE__ float samsung_log_to_linear(float y) {
     float out;
     if (y >= yt) {
         out = _exp10f((y - y1) / a1) - b1;
-    } else if (x >= x0) {
+    } else if (y < yt && y >= 0) {
         out = -1.0f * (_exp10f((y - y2) / a2)) + b2;
     } else {
         out = x0;
